@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 public class FullImageActivity extends AppCompatActivity {
     protected ImageView imageView;
-    private Double latitude, longitude;
+    protected Double latitude, longitude;
     private TextView textViewLocation;
 
     @Override
