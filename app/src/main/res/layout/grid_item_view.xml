@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/imageOne"
+        android:layout_width="@dimen/image_view_item_width"
+        android:layout_height="@dimen/image_view_item_height"
+        android:layout_columnWeight="0.5"
+        android:scaleType="fitCenter"
+        android:orientation="horizontal"
+        android:padding="@dimen/image_view_item_padding"
+        android:layout_row="0"
+        android:layout_column="0"
+        />
+
+</GridLayout>
