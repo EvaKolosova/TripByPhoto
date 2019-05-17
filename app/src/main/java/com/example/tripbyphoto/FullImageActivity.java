@@ -8,8 +8,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class FullImageActivity extends AppCompatActivity {
-    protected ImageView imageView;
     protected Double latitude, longitude;
+    private ImageView imageView;
     private TextView textViewLocation;
 
     @Override

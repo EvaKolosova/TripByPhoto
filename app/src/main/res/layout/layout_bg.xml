@@ -4,8 +4,8 @@
     <stroke android:width="@dimen/stroke_width"
         android:color="@color/colorPrimaryDark" />
     <corners android:radius="@dimen/corner_radius"/>
-    <padding android:left="@dimen/nulldimen"
-        android:top="@dimen/nulldimen"
-        android:right="@dimen/nulldimen"
-        android:bottom="@dimen/nulldimen" />
+    <padding android:left="@dimen/null_dimen"
+        android:top="@dimen/null_dimen"
+        android:right="@dimen/null_dimen"
+        android:bottom="@dimen/null_dimen" />
 </shape>

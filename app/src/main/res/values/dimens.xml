@@ -3,17 +3,27 @@
 
     <dimen name="layout_margin_8">8dp</dimen>
     <dimen name="layout_margin_16">16dp</dimen>
+    <dimen name="layout_margin_110">110dp</dimen>
+    <dimen name="layout_margin_23">23dp</dimen>
+    <dimen name="layout_toolbar_view_shadow">72dp</dimen>
+    <dimen name="layout_recycler_view">74dp</dimen>
 
     <dimen name="text_big_size">30sp</dimen>
     <dimen name="text_head_size">25sp</dimen>
+    <dimen name="text_toolbar_size">22sp</dimen>
     <dimen name="text_button_size">18sp</dimen>
     <dimen name="text_middle_size">16sp</dimen>
     <dimen name="text_little_size">14sp</dimen>
 
-    <dimen name="nulldimen">0dp</dimen>
+    <dimen name="null_dimen">0dp</dimen>
 
     <dimen name="text_location_width">300dp</dimen>
     <dimen name="text_location_height">50dp</dimen>
+
+    <dimen name="textview_height">50dp</dimen>
+    <dimen name="textview_width">190dp</dimen>
+
+    <dimen name="toolbar_view_shadow">5dp</dimen>
 
     <dimen name="image_logo_size">155dp</dimen>
 
@@ -24,14 +34,13 @@
     <dimen name="corner_radius">10dp</dimen>
     <dimen name="stroke_width">3dp</dimen>
 
-  <!-- //maybe it will be useful for creating new dimens
-    <dimen name="grid_item__height">515dp</dimen>
-    <dimen name="button_little_height">35dp</dimen>
-    <dimen name="button_little_width">125dp</dimen>
-    <dimen name="button_normal_height">85dp</dimen>
-    <dimen name="button_normal_width">280dp</dimen>
-    <dimen name="toggle_height">45dp</dimen>
-    <dimen name="toggle_width">150dp</dimen>
--->
+    <!-- //maybe it will be useful for creating new dimens
+      <dimen name="grid_item__height">515dp</dimen>
+      <dimen name="button_little_height">35dp</dimen>
+      <dimen name="button_little_width">125dp</dimen>
+      <dimen name="button_normal_height">85dp</dimen>
+      <dimen name="button_normal_width">280dp</dimen>
+      <dimen name="toggle_height">45dp</dimen>
+      <dimen name="toggle_width">150dp</dimen> -->
 
 </resources>

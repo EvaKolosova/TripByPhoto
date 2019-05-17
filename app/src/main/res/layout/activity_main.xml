@@ -13,10 +13,47 @@
         android:layout_height="match_parent"
         android:columnCount="2">
 
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="@style/AppTheme"
+            app:logo="@mipmap/ic_launcher_round"
+            />
+
+        <TextView
+            android:id="@+id/toolbarTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/toolbar"
+            android:layout_alignLeft="@+id/toolbar"
+            android:layout_alignTop="@+id/toolbar"
+            android:layout_gravity="center"
+            android:foregroundGravity="center"
+            android:layout_marginLeft="@dimen/layout_margin_110"
+            android:layout_marginTop="@dimen/layout_margin_23"
+            android:fontFamily="@font/fredericka_the_great"
+            android:gravity="center"
+            android:maxLines="1"
+            android:text="@string/app_name"
+            android:textColor="@color/colorAbsolutelyWhite"
+            android:textSize="@dimen/text_toolbar_size"
+            android:visibility="visible" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/toolbar_view_shadow"
+            android:layout_marginTop="@dimen/layout_toolbar_view_shadow"
+            android:background="@drawable/toolbar_dropshadow" />
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rvGridRecycler"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_alignTop="@+id/toolbar"
+            android:layout_marginTop="@dimen/layout_recycler_view">
 
         </android.support.v7.widget.RecyclerView>
 
