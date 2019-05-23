@@ -1,8 +1,10 @@
 package com.example.tripbyphoto;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.location.Location;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -52,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
 
                     String image = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
                     f.add(image);
-
                     Log.d("kolosova_checkInfo", image);
                 } catch (NullPointerException e) {
                     Log.d("kolosova_errorInfo", cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA)));

@@ -17,8 +17,10 @@
 
     <dimen name="null_dimen">0dp</dimen>
 
-    <dimen name="text_location_width">300dp</dimen>
-    <dimen name="text_location_height">50dp</dimen>
+    <dimen name="text_location_width">320dp</dimen>
+    <dimen name="text_location_height">75dp</dimen>
+    <dimen name="text_description_height">50dp</dimen>
+    <dimen name="text_button_height">30dp</dimen>
 
     <dimen name="textview_height">50dp</dimen>
     <dimen name="textview_width">190dp</dimen>

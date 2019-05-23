@@ -5,6 +5,7 @@
     <color name="colorAccent">#FD616D</color>
     <color name="colorAbsolutelyWhite">#FFFFFF</color>
     <color name="colorAbsolutelyBlack">#000000</color>
-    <color name="colorAbsolutelyMiddle">#1A1919</color>
+    <color name="colorAbsolutelyMiddle">#32464D</color>
     <color name="colorBackground">#F3ACDDDA</color>
+    <color name="colorMy">#FF4A8FE1</color>
 </resources>

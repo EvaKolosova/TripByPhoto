@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">TripByPhoto</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps">TripByPhoto: Map</string>
     <string name="DescriptionText">Let\'s click on image for building the route by these coordinates from your current location!</string>
     <string name="LocationInfo">Latitude: </string>
+    <string name="access_token">pk.eyJ1IjoiZXZha29sb3NvdmEiLCJhIjoiY2p2dnl2ZmRnM3I2ZjQ4cWp1dDRnc3lvbyJ9._59Xt_jeJpkxHsAFrQZUsQ</string>
+    <string name="navigation_button_text">Start navigation</string>
     <string name="AppInfo">Application for building routes from geolocation data of photos</string>
 </resources>

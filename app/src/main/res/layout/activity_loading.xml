@@ -41,7 +41,7 @@
     <TextView
         android:id="@+id/textView"
         android:layout_width="@dimen/text_location_width"
-        android:layout_height="@dimen/text_location_height"
+        android:layout_height="@dimen/text_description_height"
         android:layout_marginLeft="@dimen/layout_margin_16"
         android:layout_marginTop="@dimen/layout_margin_8"
         android:layout_marginRight="@dimen/layout_margin_8"
