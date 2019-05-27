@@ -25,7 +25,7 @@
         android:layout_marginRight="@dimen/layout_margin_16"
         android:background="@layout/layout_bg"
         android:textColor="@color/colorAbsolutelyMiddle"
-        android:enabled="false"
+        android:enabled="true"
         android:fontFamily="@font/sniglet"
         android:gravity="center"
         android:clickable="true"

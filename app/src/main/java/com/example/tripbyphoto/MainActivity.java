@@ -1,10 +1,8 @@
 package com.example.tripbyphoto;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.location.Location;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -18,16 +16,16 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     protected RecyclerViewGridAdapter adapter;
-    protected RecyclerView imagegrid;
+    protected RecyclerView imageGrid;
     private Toolbar toolbar;
     private String path, latitude, longitude;
     private ArrayList<Double> locationLatitude = new ArrayList<>();// list of latitude & longitude
     private ArrayList<Double> locationLongitude = new ArrayList<>();// list of latitude & longitude
-    private ArrayList<String> f = new ArrayList<>();// list of files paths
+    private ArrayList<String> imagePaths = new ArrayList<>();// list of files paths
     RecyclerViewGridAdapter.OnItemClickListener onItemClickListener = (View view, int position, String name) -> {
         Intent intent = new Intent(MainActivity.this, FullImageActivity.class);
         intent.setAction(android.content.Intent.ACTION_SEND);
-        path = f.get(position);
+        path = imagePaths.get(position);
         latitude = String.valueOf(locationLatitude.get(position));
         longitude = String.valueOf(locationLongitude.get(position));
         intent.putExtra("imageUri", path);
@@ -53,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
                     locationLongitude.add(data_longitude);
 
                     String image = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                    f.add(image);
+                    imagePaths.add(image);
                     Log.d("kolosova_checkInfo", image);
                 } catch (NullPointerException e) {
                     Log.d("kolosova_errorInfo", cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA)));
@@ -61,10 +59,10 @@ public class MainActivity extends AppCompatActivity {
             }
             cursor.close();
         }
-        imagegrid = findViewById(R.id.rvGridRecycler);
-        imagegrid.setLayoutManager(new GridLayoutManager(MainActivity.this, 2));
-        adapter = new RecyclerViewGridAdapter(MainActivity.this, f, locationLatitude, locationLongitude, onItemClickListener);
-        imagegrid.setAdapter(adapter);
+        imageGrid = findViewById(R.id.rvGridRecycler);
+        imageGrid.setLayoutManager(new GridLayoutManager(MainActivity.this, 2));
+        adapter = new RecyclerViewGridAdapter(MainActivity.this, imagePaths, locationLatitude, locationLongitude, onItemClickListener);
+        imageGrid.setAdapter(adapter);
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

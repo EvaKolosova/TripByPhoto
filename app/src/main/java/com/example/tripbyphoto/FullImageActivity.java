@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Locale;
 
 public class FullImageActivity extends AppCompatActivity {
-    protected Double latitude, longitude;
+    private Double latitude, longitude;
     private ImageView imageView;
-    private TextView textViewLocation;
     private String uriString, placeName;
+    private TextView textViewLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

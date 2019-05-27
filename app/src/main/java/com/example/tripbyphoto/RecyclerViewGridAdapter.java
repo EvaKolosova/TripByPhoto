@@ -13,18 +13,17 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 
 public class RecyclerViewGridAdapter extends RecyclerView.Adapter<RecyclerViewGridAdapter.ViewHolder> {
-
-    protected Context mContext;
     protected ArrayList<Double> locationLatitude;
     protected ArrayList<Double> locationLongitude;
-    private ArrayList<String> f;
+    protected Context mContext;
+    private ArrayList<String> imagePaths;
     private LayoutInflater mInflater;
     private OnItemClickListener mListener;
 
     // data is passed into the constructor
-    RecyclerViewGridAdapter(Context context, ArrayList<String> f, ArrayList<Double> locLatitude, ArrayList<Double> locLongitude, OnItemClickListener onItemClickListener) {
+    RecyclerViewGridAdapter(Context context, ArrayList<String> imagePaths, ArrayList<Double> locLatitude, ArrayList<Double> locLongitude, OnItemClickListener onItemClickListener) {
         this.mInflater = LayoutInflater.from(context);
-        this.f = f;
+        this.imagePaths = imagePaths;
         this.locationLatitude = locLatitude;
         this.locationLongitude = locLongitude;
         mContext = context;
@@ -42,21 +41,21 @@ public class RecyclerViewGridAdapter extends RecyclerView.Adapter<RecyclerViewGr
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
 
-        String itemData = f.get(position);
+        String itemData = imagePaths.get(position);
         Glide
                 .with(mContext)
                 .load(itemData)
                 .into(holder.imageview);
 
         holder.imageview.setOnClickListener((View v) -> {
-            mListener.onItemClick(v, position, "myImageView");
-            Log.d("kolosova_imagePosition", "ImageClickPosition " + position);
+            mListener.onItemClick(v, position, "imageView");
+            Log.d("kolosova_imagePosition", "ImageClickPosition: " + position);
         });
     }
 
     @Override
     public int getItemCount() {
-        return f.size();
+        return imagePaths.size();
     }
 
     public long getItemId(int position) {

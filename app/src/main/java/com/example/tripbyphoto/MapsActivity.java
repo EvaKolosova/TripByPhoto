@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
@@ -29,10 +28,9 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 public class MapsActivity extends AppCompatActivity {
     protected MapboxMap mapboxMap;
     protected String placeName = "";
-    private Button startNavigationButton;
+    private Double latitude, longitude;
     private LocationComponent locationComponent;
     private MapView mapView;
-    private Double latitude, longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +56,6 @@ public class MapsActivity extends AppCompatActivity {
         }
 
         mapView = findViewById(R.id.mapView);
-        startNavigationButton = findViewById(R.id.startButton);
 
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(new OnMapReadyCallback() {
@@ -98,17 +95,6 @@ public class MapsActivity extends AppCompatActivity {
                 });
             }
         });
-
-//        public void startNavigationClick(View view) {
-//            Log.d("kolosova_checkInfo", "button is clicked 2");
-//        }
-        View.OnClickListener buttonListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("kolosova_checkInfo", "button is clicked");
-            }
-        };
-        startNavigationButton.setOnClickListener(buttonListener);
     }
 
     @SuppressWarnings({"MissingPermission"})
@@ -135,6 +121,11 @@ public class MapsActivity extends AppCompatActivity {
 
         // Set the component's render mode
         locationComponent.setRenderMode(RenderMode.COMPASS);
+    }
+
+    public void startNavigationClick(View view) {
+        Log.d("kolosova_checkInfo", "button is clicked");
+        //funcs for creating map roads
     }
 
     @Override
