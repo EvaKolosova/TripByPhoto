@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground"
+    tools:context=".MapsActivity">
+
+    <com.mapbox.mapboxsdk.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        mapbox:mapbox_cameraTargetLat="40.73581"
+        mapbox:mapbox_cameraTargetLng="43.99155"
+        mapbox:mapbox_cameraZoom="0.5" />
+
+    <Button
+        android:id="@+id/startButton"
+        android:layout_width="@dimen/textview_width"
+        android:layout_height="@dimen/text_button_height"
+        android:layout_marginLeft="@dimen/layout_margin_16"
+        android:layout_marginTop="@dimen/layout_margin_16"
+        android:layout_marginRight="@dimen/layout_margin_16"
+        android:background="@layout/layout_bg"
+        android:textColor="@color/colorAbsolutelyMiddle"
+        android:enabled="false"
+        android:fontFamily="@font/sniglet"
+        android:gravity="center"
+        android:clickable="true"
+        android:onClick="startNavigationClick"
+        android:text="@string/navigation_button_text"
+        android:textAllCaps="false"
+        android:textSize="@dimen/text_little_size"
+        mapbox:layout_constraintEnd_toEndOf="parent"
+        mapbox:layout_constraintStart_toStartOf="parent"
+        mapbox:layout_constraintTop_toTopOf="parent" />
+
+</android.support.constraint.ConstraintLayout>

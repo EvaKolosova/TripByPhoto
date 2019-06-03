@@ -3,7 +3,11 @@ package com.example.tripbyphoto;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -38,10 +42,8 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
@@ -50,13 +52,15 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAnchor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
@@ -72,17 +76,12 @@ public class MapsActivity extends AppCompatActivity {
     private static final String ICON_LAYER_ID = "icon-layer-id";
     private static final String ICON_SOURCE_ID = "icon-source-id";
     private static final String RED_PIN_ICON_ID = "red-pin-icon-id";
-    private static final String GEOJSON_SOURCE_ID = "geojson_source_id";
-//    private static final String MARKER_IMAGE_ID = "MARKER_IMAGE_ID";
-//    private static final String MARKER_LAYER_ID = "MARKER_LAYER_ID";
-    private static final String CALLOUT_LAYER_ID = "callout_layer_id";
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 10 meters  // The minimum distance to change Updates in meters
     private static final long MIN_TIME_BW_UPDATES = 1; // 1 minute  // The minimum time between updates in milliseconds
     protected MapboxMap mapboxMap;
-    protected String placeName = "";
-    private boolean isGPSEnabled = false;
-    private boolean isNetworkEnabled = false;
-    private boolean canGetLocation = false;
+    protected String placeName = null;
+    private String placeNameClick = null, countryNameClick = null;
+    private boolean isGPSEnabled = false, isNetworkEnabled = false, canGetLocation = false;
     private LocationManager locationManager;
     private Location location;
     private Button startNavigationButton;
@@ -91,8 +90,7 @@ public class MapsActivity extends AppCompatActivity {
     private MapView mapView;
     private DirectionsRoute currentRoute;
     private MapboxDirections client;
-    private Point origin;
-    private Point destination;
+    private Point origin, destination;
     private Context context;
     private NavigationMapRoute navigationMapRoute;
 
@@ -144,9 +142,7 @@ public class MapsActivity extends AppCompatActivity {
                                 .build();
                         locationComponent = mapboxMap.getLocationComponent();
                         locationComponent.activateLocationComponent(locationComponentActivationOptions);
-                        //enableLocationComponent(style);
                         getLocation();
-
                         origin = Point.fromLngLat(deviceLongitude, deviceLatitude);
                         destination = Point.fromLngLat(longitude, latitude);
                         initSource(style);
@@ -155,16 +151,36 @@ public class MapsActivity extends AppCompatActivity {
                         startNavigationButton.setEnabled(true);
                         mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
                             @Override
-                            public boolean onMapClick(@NonNull LatLng point){
+                            public boolean onMapClick(@NonNull LatLng point) {
                                 //add marker with description
-
-                                if(!mapboxMap.getMarkers().isEmpty()){
-                                    mapboxMap.clear();
+                                placeNameClick = "";
+                                countryNameClick = "";
+                                Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+                                try {
+                                    List<Address> addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
+                                    if (addresses.get(0).getFeatureName() != null) {
+                                        placeNameClick += addresses.get(0).getFeatureName();
+                                        if ((addresses.get(0).getLocality() != null) || addresses.get(0).getAdminArea() != null)
+                                            placeNameClick += ", ";
+                                    }
+                                    if (addresses.get(0).getLocality() != null) {
+                                        placeNameClick += addresses.get(0).getLocality();
+                                        if (addresses.get(0).getAdminArea() != null)
+                                            placeNameClick += ", ";
+                                    }
+                                    if (addresses.get(0).getAdminArea() != null) {
+                                        placeNameClick += addresses.get(0).getAdminArea();
+                                    }
+                                    countryNameClick = addresses.get(0).getCountryName();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
                                 }
 
-                                mapboxMap.addMarker(new MarkerOptions().position(point));
-
-
+                                if (!mapboxMap.getMarkers().isEmpty()) {
+                                    mapboxMap.clear();
+                                }
+                                mapboxMap.addMarker(new MarkerOptions().setTitle(countryNameClick).setSnippet(placeNameClick).position(point));
+//                                ("Latitude: " + String.valueOf(point.getLatitude()).substring(0 ,10) + ", Longitude: " + String.valueOf(point.getLongitude()).substring(0 ,10)).position(point));
 //                                Point originPoint = Point.fromLngLat(deviceLongitude, deviceLatitude);
 //                                Point destinationPoint = Point.fromLngLat(longitude, latitude);
 //                                Log.i("kolosova_checkInfo", "originalPoint is " + originPoint + ", destinationPoint is " + destinationPoint);
@@ -184,7 +200,7 @@ public class MapsActivity extends AppCompatActivity {
                 FeatureCollection.fromFeatures(new Feature[]{})));
 
         GeoJsonSource iconGeoJsonSource = new GeoJsonSource(ICON_SOURCE_ID, FeatureCollection.fromFeatures(new Feature[]{
-                //Feature.fromGeometry(Point.fromLngLat(origin.longitude(), origin.latitude())),
+                //Feature.fromGeometry(Point.fromLngLat(origin.longitude(), origin.latitude())), // we should not have a marker on device's location
                 Feature.fromGeometry(Point.fromLngLat(destination.longitude(), destination.latitude()))}));
         loadedMapStyle.addSource(iconGeoJsonSource);
     }
@@ -235,16 +251,11 @@ public class MapsActivity extends AppCompatActivity {
 
             locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
-            // getting GPS status
             isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            Log.v("isGPSEnabled", "= " + isGPSEnabled);
 
-            Log.v("isGPSEnabled", "=" + isGPSEnabled);
-
-            // getting network status
-            isNetworkEnabled = locationManager
-                    .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-            Log.v("isNetworkEnabled", "=" + isNetworkEnabled);
+            isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            Log.v("isNetworkEnabled", "= " + isNetworkEnabled);
 
             if (isGPSEnabled == false && isNetworkEnabled == false) {
                 // no network provider is enabled
@@ -270,7 +281,6 @@ public class MapsActivity extends AppCompatActivity {
                         }
                     }
                 }
-                // if GPS Enabled get lat/long using GPS Services
                 if (isGPSEnabled) {
                     location = null;
                     if (location == null) {
@@ -289,32 +299,12 @@ public class MapsActivity extends AppCompatActivity {
                 }
             }
 
-            // Set the component's camera mode
             locationComponent.setCameraMode(CameraMode.TRACKING);
-
-            // Set the component's render mode
             locationComponent.setRenderMode(RenderMode.COMPASS);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return location;
-    }
-
-    private void setUpInfoWindowLayer(@NonNull Style loadedStyle) {
-        loadedStyle.addLayer(new SymbolLayer(CALLOUT_LAYER_ID, GEOJSON_SOURCE_ID)
-                .withProperties(
-                        /* show image with id title based on the value of the name feature property */
-                        iconImage("{ }"),
-
-                        /* set anchor of icon to bottom-left */
-                        iconAnchor(Property.ICON_ANCHOR_BOTTOM),
-
-                        /* all info window and marker image to appear at the same time*/
-                        iconAllowOverlap(true),
-
-                        /* offset the info window to be above the marker */
-                        iconOffset(new Float[] {-2f, -28f})
-                ));
     }
 
     public void startNavigationClick(View view) {
@@ -326,7 +316,6 @@ public class MapsActivity extends AppCompatActivity {
                 //.shouldSimulateRoute(simulateRoute) //for checking routeNavigationFunctions
                 .build();
 
-        // Call this method with Context from within an Activity
         NavigationLauncher.startNavigation(MapsActivity.this, options);
     }
 
@@ -448,7 +437,10 @@ public class MapsActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mapView.onSaveInstanceState(outState);
+        if (outState != null) {
+            mapView.onSaveInstanceState(outState);
+        }
+
     }
 
     @Override
