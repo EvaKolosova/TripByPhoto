@@ -3,8 +3,6 @@ package com.example.tripbyphoto;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
@@ -16,19 +14,17 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -59,7 +55,6 @@ import java.util.Locale;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
@@ -78,7 +73,7 @@ public class MapsActivity extends AppCompatActivity {
     private static final String RED_PIN_ICON_ID = "red-pin-icon-id";
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 10 meters  // The minimum distance to change Updates in meters
     private static final long MIN_TIME_BW_UPDATES = 1; // 1 minute  // The minimum time between updates in milliseconds
-    protected MapboxMap mapboxMap;
+    protected MapboxMap myMapboxMap;
     protected String placeName = null;
     private String placeNameClick = null, countryNameClick = null;
     private boolean isGPSEnabled = false, isNetworkEnabled = false, canGetLocation = false;
@@ -125,7 +120,8 @@ public class MapsActivity extends AppCompatActivity {
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(@NonNull final MapboxMap mapboxMap) {
-                mapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"), new Style.OnStyleLoaded() { // Style.MAPBOX_STREETS
+                myMapboxMap = mapboxMap;
+                myMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"), new Style.OnStyleLoaded() {
                     @Override
                     public void onStyleLoaded(@NonNull Style style) {
                         int blue = Color.parseColor("#FF4A8FE1");
@@ -140,7 +136,7 @@ public class MapsActivity extends AppCompatActivity {
                         LocationComponentActivationOptions locationComponentActivationOptions = LocationComponentActivationOptions.builder(MapsActivity.this, style)
                                 .locationComponentOptions(locationComponentOptions)
                                 .build();
-                        locationComponent = mapboxMap.getLocationComponent();
+                        locationComponent = myMapboxMap.getLocationComponent();
                         locationComponent.activateLocationComponent(locationComponentActivationOptions);
                         getLocation();
                         origin = Point.fromLngLat(deviceLongitude, deviceLatitude);
@@ -149,7 +145,15 @@ public class MapsActivity extends AppCompatActivity {
                         initLayers(style);
                         getRoute(style, origin, destination);
                         startNavigationButton.setEnabled(true);
-                        mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
+                        mapView.addOnDidFinishLoadingStyleListener(new MapView.OnDidFinishLoadingStyleListener() {
+                            @Override
+                            public void onDidFinishLoadingStyle() {
+                                Log.i("kolosova_checkInfo", "map has changed");
+                                LatLng point = new LatLng(latitude, longitude);
+                                myMapboxMap.addMarker(new MarkerOptions().position(point));
+                            }
+                        });
+                        myMapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
                             @Override
                             public boolean onMapClick(@NonNull LatLng point) {
                                 //add marker with description
@@ -176,10 +180,10 @@ public class MapsActivity extends AppCompatActivity {
                                     e.printStackTrace();
                                 }
 
-                                if (!mapboxMap.getMarkers().isEmpty()) {
-                                    mapboxMap.clear();
+                                if (!myMapboxMap.getMarkers().isEmpty()) {
+                                    myMapboxMap.clear();
                                 }
-                                mapboxMap.addMarker(new MarkerOptions().setTitle(countryNameClick).setSnippet(placeNameClick).position(point));
+                                myMapboxMap.addMarker(new MarkerOptions().setTitle(countryNameClick).setSnippet(placeNameClick).position(point));
 //                                ("Latitude: " + String.valueOf(point.getLatitude()).substring(0 ,10) + ", Longitude: " + String.valueOf(point.getLongitude()).substring(0 ,10)).position(point));
 //                                Point originPoint = Point.fromLngLat(deviceLongitude, deviceLatitude);
 //                                Point destinationPoint = Point.fromLngLat(longitude, latitude);
@@ -309,7 +313,7 @@ public class MapsActivity extends AppCompatActivity {
 
     public void startNavigationClick(View view) {
         Log.d("kolosova_checkInfo", "button is clicked");
-
+        //TODO проверка есть ли маршрут сделать!
         boolean simulateRoute = true;
         NavigationLauncherOptions options = NavigationLauncherOptions.builder()
                 .directionsRoute(currentRoute)
@@ -320,8 +324,10 @@ public class MapsActivity extends AppCompatActivity {
     }
 
     private void getRoute(@NonNull final Style style, Point origin, Point destination) {
-
-        client = MapboxDirections.builder()
+        // region NAVIGATION QUICK ROUTE
+        // более быстрый вариант отрисовки пути, но это лишь синяя линия без учета пробок и она может отличаться от маршрута, который будет строиться для конечной навигации,
+        // использование GeoJSON обьекта для рисования пути.
+        /*client = MapboxDirections.builder()
                 .origin(origin)
                 .destination(destination)
                 .overview(DirectionsCriteria.OVERVIEW_FULL)
@@ -365,7 +371,8 @@ public class MapsActivity extends AppCompatActivity {
                 Toast.makeText(MapsActivity.this, "Error: " + throwable.getMessage(),
                         Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
+        // endregion
 
         NavigationRoute.builder(this)
                 .accessToken(Mapbox.getAccessToken())
@@ -376,6 +383,8 @@ public class MapsActivity extends AppCompatActivity {
                 .getRoute(new Callback<DirectionsResponse>() {
                     @Override
                     public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                        System.out.println(call.request().url().toString());
+
                         Log.d(TAG, "Response code: " + response.code());
                         if (response.body() == null) {
                             Log.e(TAG, "No routes found, make sure you set the right user and access token.");
@@ -389,17 +398,9 @@ public class MapsActivity extends AppCompatActivity {
                         if (navigationMapRoute != null) {
                             navigationMapRoute.removeRoute();
                         } else {
-                            try {
-                                navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
-                            } catch (NullPointerException ex) {
-                                Log.i(TAG, "NullPointerEx in new NavigationMapRoute");
-                            }
+                                navigationMapRoute = new NavigationMapRoute(null, mapView, myMapboxMap);
                         }
-                        try {
                             navigationMapRoute.addRoute(currentRoute);
-                        } catch (NullPointerException e) {
-                            Log.i(TAG, "NullPointerEx in navigationMapRoute.addRoute");
-                        }
                     }
 
                     @Override
@@ -460,7 +461,34 @@ public class MapsActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        onBackPressed();
+        switch (item.getItemId()) {
+
+            case R.id.item1:
+                Log.d("kolosova_checkInfo", String.valueOf(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll")));
+                myMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"));
+                return true;
+            case R.id.item2:
+                Log.d("kolosova_checkInfo", Style.MAPBOX_STREETS);
+                myMapboxMap.setStyle(Style.MAPBOX_STREETS);
+                return true;
+            case R.id.item3:
+                Log.d("kolosova_checkInfo", Style.SATELLITE);
+                myMapboxMap.setStyle(Style.SATELLITE);
+                return true;
+            case R.id.item4:
+                Log.d("kolosova_checkInfo", Style.SATELLITE_STREETS);
+                myMapboxMap.setStyle(Style.SATELLITE_STREETS);
+                return true;
+            default:
+                onBackPressed();
+                return true;
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
         return true;
     }
 }

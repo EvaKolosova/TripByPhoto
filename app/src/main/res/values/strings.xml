@@ -7,4 +7,8 @@
     <string name="navigation_button_text">Start navigation</string>
     <string name="AppInfo">Application for building routes from geolocation data of photos</string>
     <string name="directions_activity_toast_message">Route is %.0f meters long.</string>
+    <string name="item1">App Style</string>
+    <string name="item2">Streets</string>
+    <string name="item3">Satellite</string>
+    <string name="item4">Satellite Streets</string>
 </resources>
