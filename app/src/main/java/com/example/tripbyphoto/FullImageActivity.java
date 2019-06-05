@@ -1,7 +1,9 @@
 package com.example.tripbyphoto;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
@@ -21,6 +23,10 @@ public class FullImageActivity extends AppCompatActivity {
     private ImageView imageView;
     private String uriString, placeName, countryName;
     private TextView textViewLocation;
+
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +89,26 @@ public class FullImageActivity extends AppCompatActivity {
             textViewLocation.append(", " + placeName);
         } else {
             textViewLocation.append("\n " + placeName);
+        }
+
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if (textViewLocation.getText().length() > 75) {
+                textViewLocation.getLayoutParams().height = 130;
+            }
+        }
+        else {
+            Log.d("kill", String.valueOf(textViewLocation.getText().length()));
+            if (textViewLocation.getText().length() > 40 && textViewLocation.getText().length() < 80) {
+                textViewLocation.getLayoutParams().height = 130;
+                Log.d("kill1", String.valueOf(textViewLocation.getText().length()));
+            }
+            else if(textViewLocation.getText().length() > 80 && textViewLocation.getText().length() < 120) {
+                textViewLocation.getLayoutParams().height = 205;
+                Log.d("kill2", String.valueOf(textViewLocation.getText().length()));
+            }
+            else {
+                textViewLocation.getLayoutParams().height = 280;
+            }
         }
 
         imageView.setOnClickListener(v -> {

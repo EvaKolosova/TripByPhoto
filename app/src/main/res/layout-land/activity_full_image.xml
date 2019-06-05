@@ -19,7 +19,7 @@
     <TextView
         android:id="@+id/textViewLocation"
         android:layout_width="@dimen/text_land_location_width"
-        android:layout_height="@dimen/textview_height"
+        android:layout_height="@dimen/text_head_size"
         android:layout_marginLeft="@dimen/layout_margin_8"
         android:layout_marginTop="@dimen/layout_margin_8"
         android:layout_marginRight="@dimen/layout_margin_8"
