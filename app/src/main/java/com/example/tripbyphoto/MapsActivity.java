@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
@@ -12,20 +11,13 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Html;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewParent;
 import android.widget.Button;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -54,8 +46,6 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -65,11 +55,6 @@ import timber.log.Timber;
 
 public class MapsActivity extends AppCompatActivity {
     private static final String TAG = "DirectionsInfo";
-    private static final String ROUTE_LAYER_ID = "route-layer-id";
-    private static final String ROUTE_SOURCE_ID = "route-source-id";
-    private static final String ICON_LAYER_ID = "icon-layer-id";
-    private static final String ICON_SOURCE_ID = "icon-source-id";
-    private static final String RED_PIN_ICON_ID = "red-pin-icon-id";
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 10 meters  // The minimum distance to change Updates in meters
     private static final long MIN_TIME_BW_UPDATES = 1; // 1 minute  // The minimum time between updates in milliseconds
     protected MapboxMap myMapboxMap;
@@ -166,28 +151,10 @@ public class MapsActivity extends AppCompatActivity {
 
     private void addMarkerOnMap(@NonNull LatLng point) {
         //adds marker with description
-        placeNameClick = "";
-        countryNameClick = "";
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
-            if (addresses.get(0).getFeatureName() != null) {
-                placeNameClick += addresses.get(0).getFeatureName();
-                if ((addresses.get(0).getLocality() != null) || addresses.get(0).getAdminArea() != null)
-                    placeNameClick += ", ";
-            }
-            if (addresses.get(0).getLocality() != null) {
-                placeNameClick += addresses.get(0).getLocality();
-                if (addresses.get(0).getAdminArea() != null)
-                    placeNameClick += ", ";
-            }
-            if (addresses.get(0).getAdminArea() != null) {
-                placeNameClick += addresses.get(0).getAdminArea();
-            }
-            countryNameClick = addresses.get(0).getCountryName();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        GetInfo getInfo = new GetInfo();
+        placeNameClick = getInfo.getPlaceFullName(geocoder, point);
+        countryNameClick = getInfo.getPlaceFullName(geocoder, point);
         myMapboxMap.addMarker(new MarkerOptions().setTitle(countryNameClick).setSnippet(placeNameClick).position(point));
     }
 
@@ -284,7 +251,7 @@ public class MapsActivity extends AppCompatActivity {
         // более быстрый вариант отрисовки пути, но это лишь синяя линия без учета пробок и она может отличаться от маршрута, который будет строиться для конечной навигации,
         // использование GeoJSON обьекта для рисования пути.
         // при тестирование на физическом нужно раскоменчивать :(
-        /*client = MapboxDirections.builder()
+        client = MapboxDirections.builder()
                 .origin(origin)
                 .destination(destination)
                 .overview(DirectionsCriteria.OVERVIEW_FULL)
@@ -310,7 +277,7 @@ public class MapsActivity extends AppCompatActivity {
 
                 if (style.isFullyLoaded()) {
                     // Retrieve and update the source designated for showing the directions route
-                    GeoJsonSource source = style.getSourceAs(ROUTE_SOURCE_ID);
+                    GeoJsonSource source = style.getSourceAs("route-source-id");
 
                     // Create a LineString with the directions route's geometry and
                     // reset the GeoJSON source for the route LineLayer source
@@ -328,7 +295,7 @@ public class MapsActivity extends AppCompatActivity {
                 Toast.makeText(MapsActivity.this, "Error: " + throwable.getMessage(),
                         Toast.LENGTH_SHORT).show();
             }
-        });*/
+        });
         // endregion
 
         NavigationRoute.builder(this)
