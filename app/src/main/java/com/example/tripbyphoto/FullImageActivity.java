@@ -1,6 +1,7 @@
 package com.example.tripbyphoto;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
@@ -76,7 +77,13 @@ public class FullImageActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        textViewLocation.append("\n " + placeName);
+
+        int orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            textViewLocation.append(", " + placeName);
+        } else {
+            textViewLocation.append("\n " + placeName);
+        }
 
         imageView.setOnClickListener(v -> {
             Intent intent = new Intent(FullImageActivity.this, MapsActivity.class);

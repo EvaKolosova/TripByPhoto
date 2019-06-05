@@ -14,16 +14,16 @@
         android:layout_centerHorizontal="true"
         android:foregroundGravity="center"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="@dimen/nulldimen" />
+        tools:layout_editor_absoluteX="0dp" />
 
     <TextView
         android:id="@+id/textViewLocation"
-        android:layout_width="@dimen/text_location_width"
-        android:layout_height="@dimen/text_location_height"
+        android:layout_width="@dimen/text_land_location_width"
+        android:layout_height="@dimen/textview_height"
         android:layout_marginLeft="@dimen/layout_margin_8"
         android:layout_marginTop="@dimen/layout_margin_8"
         android:layout_marginRight="@dimen/layout_margin_8"
-        android:layout_marginBottom="@dimen/layout_margin_16"
+        android:layout_marginBottom="@dimen/layout_margin_8"
         android:background="@layout/layout_bg"
         android:fontFamily="@font/sniglet"
         android:gravity="center"
@@ -38,10 +38,10 @@
 
     <TextView
         android:id="@+id/textViewDescription"
-        android:layout_width="@dimen/text_location_width"
-        android:layout_height="@dimen/text_description_height"
+        android:layout_width="@dimen/text_land_location_width"
+        android:layout_height="@dimen/text_button_height"
         android:layout_marginLeft="@dimen/layout_margin_8"
-        android:layout_marginTop="@dimen/layout_margin_16"
+        android:layout_marginTop="@dimen/layout_margin_8"
         android:layout_marginRight="@dimen/layout_margin_8"
         android:background="@layout/layout_bg"
         android:fontFamily="@font/sniglet"

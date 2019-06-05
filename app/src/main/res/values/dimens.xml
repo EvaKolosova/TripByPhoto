@@ -22,12 +22,14 @@
     <dimen name="null_dimen">0dp</dimen>
 
     <dimen name="text_location_width">320dp</dimen>
+    <dimen name="text_land_location_width">580dp</dimen>
     <dimen name="text_location_height">75dp</dimen>
     <dimen name="text_description_height">50dp</dimen>
     <dimen name="text_button_height">30dp</dimen>
 
     <dimen name="textview_height">50dp</dimen>
     <dimen name="textview_width">190dp</dimen>
+    <dimen name="textview_land_width">230dp</dimen>
 
     <dimen name="toolbar_view_shadow">5dp</dimen>
 
@@ -41,7 +43,6 @@
     <dimen name="stroke_width">3dp</dimen>
 
     <!-- //maybe it will be useful for creating new dimens
-      <dimen name="grid_item__height">515dp</dimen>
       <dimen name="button_little_height">35dp</dimen>
       <dimen name="button_little_width">125dp</dimen>
       <dimen name="button_normal_height">85dp</dimen>
