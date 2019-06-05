@@ -1,0 +1,27 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="?attr/actionBarSize"
+    android:layout_width="match_parent"
+    android:id="@+id/menu"
+    app:theme="@style/AppTheme">
+    <item
+        android:id="@+id/item1"
+        app:showAsAction="never"
+        android:title="@string/item1">
+    </item>
+    <item
+        android:id="@+id/item2"
+        app:showAsAction="never"
+        android:title="@string/item2">
+    </item>
+    <item
+        android:id="@+id/item3"
+        app:showAsAction="never"
+        android:title="@string/item3">
+    </item>
+    <item
+        android:id="@+id/item4"
+        app:showAsAction="never"
+        android:title="@string/item4">
+    </item>
+</menu>

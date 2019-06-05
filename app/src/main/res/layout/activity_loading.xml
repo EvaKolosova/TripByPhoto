@@ -7,6 +7,7 @@
     tools:context=".LoadingActivity"
     android:background="@drawable/oldpicture">
 
+
     <TextView
         android:id="@+id/textView2"
         android:layout_width="@dimen/textview_width"
@@ -35,7 +36,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.653"
+        app:layout_constraintVertical_bias="0.609"
         app:srcCompat="@mipmap/ic_launcher" />
 
     <TextView
@@ -53,9 +54,9 @@
         app:fontFamily="@font/sniglet"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.448"
+        app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView"
-        app:layout_constraintVertical_bias="0.823" />
+        app:layout_constraintVertical_bias="0.95" />
 
 </android.support.constraint.ConstraintLayout>

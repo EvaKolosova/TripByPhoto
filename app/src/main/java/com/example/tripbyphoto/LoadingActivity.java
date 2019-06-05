@@ -19,16 +19,13 @@ public class LoadingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (ContextCompat.checkSelfPermission(LoadingActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                        ContextCompat.checkSelfPermission(LoadingActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    //permissions has already been granted
-                    startActivity(new Intent(LoadingActivity.this, MainActivity.class));
-                } else {
-                    requestFewPermissions();
-                }
+        new Handler().postDelayed(() -> {
+            if (ContextCompat.checkSelfPermission(LoadingActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(LoadingActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                //permissions has already been granted
+                startActivity(new Intent(LoadingActivity.this, MainActivity.class));
+            } else {
+                requestFewPermissions();
             }
         }, 3500);
     }
