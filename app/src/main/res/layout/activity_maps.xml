@@ -14,7 +14,9 @@
         android:layout_height="match_parent"
         mapbox:mapbox_cameraTargetLat="40.73581"
         mapbox:mapbox_cameraTargetLng="43.99155"
-        mapbox:mapbox_cameraZoom="0.5" />
+        mapbox:mapbox_cameraZoom="0.5"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
 
     <Button
         android:id="@+id/startButton"
@@ -25,7 +27,8 @@
         android:layout_marginBottom="@dimen/layout_margin_16"
         android:background="@layout/layout_bg"
         android:clickable="true"
-        android:enabled="false"
+        android:enabled="true"
+        android:visibility="invisible"
         android:fontFamily="@font/sniglet"
         android:gravity="center"
         android:onClick="startNavigationClick"

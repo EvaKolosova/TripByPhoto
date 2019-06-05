@@ -19,12 +19,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -36,13 +40,8 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.layers.LineLayer;
-import com.mapbox.mapboxsdk.style.layers.Property;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -55,14 +54,7 @@ import java.util.Locale;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineCap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineJoin;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
+import timber.log.Timber;
 
 public class MapsActivity extends AppCompatActivity {
     private static final String TAG = "DirectionsInfo";
@@ -74,8 +66,8 @@ public class MapsActivity extends AppCompatActivity {
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 10 meters  // The minimum distance to change Updates in meters
     private static final long MIN_TIME_BW_UPDATES = 1; // 1 minute  // The minimum time between updates in milliseconds
     protected MapboxMap myMapboxMap;
-    protected String placeName = null;
-    private String placeNameClick = null, countryNameClick = null;
+    protected String placeName, countryName;
+    private String placeNameClick, countryNameClick;
     private boolean isGPSEnabled = false, isNetworkEnabled = false, canGetLocation = false;
     private LocationManager locationManager;
     private Location location;
@@ -83,9 +75,10 @@ public class MapsActivity extends AppCompatActivity {
     private Double latitude, longitude, deviceLatitude, deviceLongitude;
     private LocationComponent locationComponent;
     private MapView mapView;
-    private DirectionsRoute currentRoute;
+    private DirectionsRoute currentRoute = null;
     private MapboxDirections client;
     private Point origin, destination;
+    private LatLng pointOfDestination;
     private Context context;
     private NavigationMapRoute navigationMapRoute;
 
@@ -112,125 +105,83 @@ public class MapsActivity extends AppCompatActivity {
             placeName = getIntent().getStringExtra("MAP_place_name");
         }
 
+        if (getIntent().hasExtra("MAP_country_name")) {
+            countryName = getIntent().getStringExtra("MAP_country_name");
+        }
+        pointOfDestination = new LatLng(latitude, longitude);
         mapView = findViewById(R.id.mapView);
         startNavigationButton = findViewById(R.id.startButton);
         context = this;
 
         mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(@NonNull final MapboxMap mapboxMap) {
-                myMapboxMap = mapboxMap;
-                myMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"), new Style.OnStyleLoaded() {
-                    @Override
-                    public void onStyleLoaded(@NonNull Style style) {
-                        int blue = Color.parseColor("#FF4A8FE1");
-                        float alpfa = 1f;
-                        LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(MapsActivity.this)
-                                .foregroundTintColor(blue)
-                                .backgroundTintColor(Color.WHITE)
-                                .bearingTintColor(blue)
-                                .accuracyAlpha(alpfa)
-                                .accuracyColor(blue)
-                                .build();
-                        LocationComponentActivationOptions locationComponentActivationOptions = LocationComponentActivationOptions.builder(MapsActivity.this, style)
-                                .locationComponentOptions(locationComponentOptions)
-                                .build();
-                        locationComponent = myMapboxMap.getLocationComponent();
-                        locationComponent.activateLocationComponent(locationComponentActivationOptions);
-                        getLocation();
-                        origin = Point.fromLngLat(deviceLongitude, deviceLatitude);
-                        destination = Point.fromLngLat(longitude, latitude);
-                        initSource(style);
-                        initLayers(style);
-                        getRoute(style, origin, destination);
-                        startNavigationButton.setEnabled(true);
-                        mapView.addOnDidFinishLoadingStyleListener(new MapView.OnDidFinishLoadingStyleListener() {
-                            @Override
-                            public void onDidFinishLoadingStyle() {
-                                Log.i("kolosova_checkInfo", "map has changed");
-                                LatLng point = new LatLng(latitude, longitude);
-                                myMapboxMap.addMarker(new MarkerOptions().position(point));
-                            }
-                        });
-                        myMapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
-                            @Override
-                            public boolean onMapClick(@NonNull LatLng point) {
-                                //add marker with description
-                                placeNameClick = "";
-                                countryNameClick = "";
-                                Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-                                try {
-                                    List<Address> addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
-                                    if (addresses.get(0).getFeatureName() != null) {
-                                        placeNameClick += addresses.get(0).getFeatureName();
-                                        if ((addresses.get(0).getLocality() != null) || addresses.get(0).getAdminArea() != null)
-                                            placeNameClick += ", ";
-                                    }
-                                    if (addresses.get(0).getLocality() != null) {
-                                        placeNameClick += addresses.get(0).getLocality();
-                                        if (addresses.get(0).getAdminArea() != null)
-                                            placeNameClick += ", ";
-                                    }
-                                    if (addresses.get(0).getAdminArea() != null) {
-                                        placeNameClick += addresses.get(0).getAdminArea();
-                                    }
-                                    countryNameClick = addresses.get(0).getCountryName();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-
-                                if (!myMapboxMap.getMarkers().isEmpty()) {
-                                    myMapboxMap.clear();
-                                }
-                                myMapboxMap.addMarker(new MarkerOptions().setTitle(countryNameClick).setSnippet(placeNameClick).position(point));
-//                                ("Latitude: " + String.valueOf(point.getLatitude()).substring(0 ,10) + ", Longitude: " + String.valueOf(point.getLongitude()).substring(0 ,10)).position(point));
-//                                Point originPoint = Point.fromLngLat(deviceLongitude, deviceLatitude);
-//                                Point destinationPoint = Point.fromLngLat(longitude, latitude);
-//                                Log.i("kolosova_checkInfo", "originalPoint is " + originPoint + ", destinationPoint is " + destinationPoint);
-//                                getRoute(style, originPoint, destinationPoint);
-//                                startNavigationButton.setEnabled(true);
-                                return true;
-                            }
-                        });
-                    }
+        mapView.getMapAsync(mapboxMap -> {
+            myMapboxMap = mapboxMap;
+            myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(countryName).setSnippet(placeName));
+            myMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"), style -> {
+                int blue = Color.parseColor("#FF4A8FE1");
+                float alpfa = 1f;
+                LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(MapsActivity.this)
+                        .foregroundTintColor(blue)
+                        .backgroundTintColor(Color.WHITE)
+                        .bearingTintColor(blue)
+                        .accuracyAlpha(alpfa)
+                        .accuracyColor(blue)
+                        .build();
+                LocationComponentActivationOptions locationComponentActivationOptions = LocationComponentActivationOptions.builder(MapsActivity.this, style)
+                        .locationComponentOptions(locationComponentOptions)
+                        .build();
+                locationComponent = myMapboxMap.getLocationComponent();
+                locationComponent.activateLocationComponent(locationComponentActivationOptions);
+                getLocation();
+                origin = Point.fromLngLat(deviceLongitude, deviceLatitude);
+                destination = Point.fromLngLat(longitude, latitude);
+                getRoute(style, origin, destination);
+                mapView.addOnDidFinishLoadingStyleListener(() -> {
+                    Log.i("kolosova_checkInfo", "map's style has changed");
+                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(countryName).setSnippet(placeName));
                 });
-            }
+                mapView.addOnDidFinishLoadingMapListener(() -> {
+                    Log.i("kolosova_checkInfo", "map has loaded");
+                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(countryName).setSnippet(placeName));
+                });
+                myMapboxMap.addOnMapClickListener(point -> {
+                    Log.d("kolosova_checkInfo", "inside");
+                    if (!myMapboxMap.getMarkers().isEmpty()) {
+                        myMapboxMap.clear();
+                    }
+                    addMarkerOnMap(point);
+                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(countryName).setSnippet(placeName));
+                    return true;
+                });
+            });
         });
     }
 
-    private void initSource(@NonNull Style loadedMapStyle) {
-        loadedMapStyle.addSource(new GeoJsonSource(ROUTE_SOURCE_ID,
-                FeatureCollection.fromFeatures(new Feature[]{})));
-
-        GeoJsonSource iconGeoJsonSource = new GeoJsonSource(ICON_SOURCE_ID, FeatureCollection.fromFeatures(new Feature[]{
-                //Feature.fromGeometry(Point.fromLngLat(origin.longitude(), origin.latitude())), // we should not have a marker on device's location
-                Feature.fromGeometry(Point.fromLngLat(destination.longitude(), destination.latitude()))}));
-        loadedMapStyle.addSource(iconGeoJsonSource);
-    }
-
-    private void initLayers(@NonNull Style loadedMapStyle) {
-        LineLayer routeLayer = new LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID);
-
-        // Add the LineLayer to the map. This layer will display the directions route.
-        routeLayer.setProperties(
-                lineCap(Property.LINE_CAP_ROUND),
-                lineJoin(Property.LINE_JOIN_ROUND),
-                lineWidth(5f),
-                lineColor(Color.parseColor("#21AAF3"))
-        );
-        loadedMapStyle.addLayer(routeLayer);
-
-        // Add the red marker icon image to the map
-        loadedMapStyle.addImage(RED_PIN_ICON_ID, BitmapUtils.getBitmapFromDrawable(
-                getResources().getDrawable(R.drawable.mapbox_marker_icon_default)));
-
-        // Add the red marker icon SymbolLayer to the map
-        loadedMapStyle.addLayer(new SymbolLayer(ICON_LAYER_ID, ICON_SOURCE_ID).withProperties(
-                iconImage(RED_PIN_ICON_ID),
-                iconIgnorePlacement(true),
-                iconIgnorePlacement(true),
-                iconOffset(new Float[]{0f, -4f})));
+    private void addMarkerOnMap(@NonNull LatLng point) {
+        //adds marker with description
+        placeNameClick = "";
+        countryNameClick = "";
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
+            if (addresses.get(0).getFeatureName() != null) {
+                placeNameClick += addresses.get(0).getFeatureName();
+                if ((addresses.get(0).getLocality() != null) || addresses.get(0).getAdminArea() != null)
+                    placeNameClick += ", ";
+            }
+            if (addresses.get(0).getLocality() != null) {
+                placeNameClick += addresses.get(0).getLocality();
+                if (addresses.get(0).getAdminArea() != null)
+                    placeNameClick += ", ";
+            }
+            if (addresses.get(0).getAdminArea() != null) {
+                placeNameClick += addresses.get(0).getAdminArea();
+            }
+            countryNameClick = addresses.get(0).getCountryName();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        myMapboxMap.addMarker(new MarkerOptions().setTitle(countryNameClick).setSnippet(placeNameClick).position(point));
     }
 
     public Location getLocation() {
@@ -313,11 +264,9 @@ public class MapsActivity extends AppCompatActivity {
 
     public void startNavigationClick(View view) {
         Log.d("kolosova_checkInfo", "button is clicked");
-        //TODO проверка есть ли маршрут сделать!
-        boolean simulateRoute = true;
         NavigationLauncherOptions options = NavigationLauncherOptions.builder()
                 .directionsRoute(currentRoute)
-                //.shouldSimulateRoute(simulateRoute) //for checking routeNavigationFunctions
+                //.shouldSimulateRoute(true) //for checking routeNavigationFunctions
                 .build();
 
         NavigationLauncher.startNavigation(MapsActivity.this, options);
@@ -327,6 +276,7 @@ public class MapsActivity extends AppCompatActivity {
         // region NAVIGATION QUICK ROUTE
         // более быстрый вариант отрисовки пути, но это лишь синяя линия без учета пробок и она может отличаться от маршрута, который будет строиться для конечной навигации,
         // использование GeoJSON обьекта для рисования пути.
+        // при тестирование на физическом нужно раскоменчивать :(
         /*client = MapboxDirections.builder()
                 .origin(origin)
                 .destination(destination)
@@ -391,16 +341,21 @@ public class MapsActivity extends AppCompatActivity {
                             return;
                         } else if (response.body().routes().size() < 1) {
                             Log.e(TAG, "No routes found");
+                            Toast.makeText(context, "No routes found...",
+                                    Toast.LENGTH_SHORT).show();
                             return;
                         }
                         currentRoute = response.body().routes().get(0);
                         // Draw the route on the map
-                        if (navigationMapRoute != null) {
-                            navigationMapRoute.removeRoute();
-                        } else {
+                        if (style.isFullyLoaded()) {
+                            if (navigationMapRoute != null) {
+                                navigationMapRoute.removeRoute();
+                            } else {
                                 navigationMapRoute = new NavigationMapRoute(null, mapView, myMapboxMap);
-                        }
+                            }
                             navigationMapRoute.addRoute(currentRoute);
+                        }
+                        startNavigationButton.setVisibility(View.VISIBLE);
                     }
 
                     @Override

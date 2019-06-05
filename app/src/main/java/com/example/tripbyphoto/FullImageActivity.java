@@ -6,8 +6,8 @@ import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,7 +18,7 @@ import java.util.Locale;
 public class FullImageActivity extends AppCompatActivity {
     private Double latitude, longitude;
     private ImageView imageView;
-    private String uriString, placeName;
+    private String uriString, placeName, countryName;
     private TextView textViewLocation;
 
     @Override
@@ -52,22 +52,40 @@ public class FullImageActivity extends AppCompatActivity {
 
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         try {
+            placeName = "";
+            countryName = "";
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
-            placeName = addresses.get(0).getAddressLine(0);
+            if (addresses.get(0).getFeatureName() != null) {
+                placeName += addresses.get(0).getFeatureName();
+                Log.d("kolosova_checkInfo", placeName);
+                if ((addresses.get(0).getLocality() != null) || addresses.get(0).getAdminArea() != null)
+                    placeName += ", ";
+            }
+            if (addresses.get(0).getLocality() != null) {
+                placeName += addresses.get(0).getLocality();
+                Log.d("kolosova_checkInfo", placeName);
+                if (addresses.get(0).getAdminArea() != null)
+                    placeName += ", ";
+            }
+            if (addresses.get(0).getAdminArea() != null) {
+                placeName += addresses.get(0).getAdminArea();
+                Log.d("kolosova_checkInfo", placeName);
+            }
+            countryName = addresses.get(0).getCountryName();
+            Log.d("kolosova_checkInfo", countryName);
         } catch (IOException e) {
             e.printStackTrace();
         }
         textViewLocation.append("\n " + placeName);
 
-        imageView.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(FullImageActivity.this, MapsActivity.class);
-                intent.setAction(android.content.Intent.ACTION_SEND);
-                intent.putExtra("MAP_latitude", String.valueOf(latitude));
-                intent.putExtra("MAP_longitude", String.valueOf(longitude));
-                intent.putExtra("MAP_place_name", placeName);
-                startActivity(intent);
-            }
+        imageView.setOnClickListener(v -> {
+            Intent intent = new Intent(FullImageActivity.this, MapsActivity.class);
+            intent.setAction(Intent.ACTION_SEND);
+            intent.putExtra("MAP_latitude", String.valueOf(latitude));
+            intent.putExtra("MAP_longitude", String.valueOf(longitude));
+            intent.putExtra("MAP_place_name", placeName);
+            intent.putExtra("MAP_country_name", countryName);
+            startActivity(intent);
         });
     }
 
