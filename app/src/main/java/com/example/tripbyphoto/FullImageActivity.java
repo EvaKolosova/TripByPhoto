@@ -66,15 +66,15 @@ public class FullImageActivity extends AppCompatActivity {
         Integer textLength = textViewLocation.getText().length();
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             if (textLength > 75) {
-                textViewLocation.getLayoutParams().height = 130;
+                textViewLocation.getLayoutParams().height *= 2;
             }
         } else {
             if (textLength > 40 && textLength < 80) {
-                textViewLocation.getLayoutParams().height = 130;
+                textViewLocation.getLayoutParams().height *= 2;
             } else if (textLength > 80 && textLength < 120) {
-                textViewLocation.getLayoutParams().height = 205;
+                textViewLocation.getLayoutParams().height *= 3;
             } else {
-                textViewLocation.getLayoutParams().height = 280;
+                textViewLocation.getLayoutParams().height *= 4;
             }
         }
 
@@ -91,6 +91,7 @@ public class FullImageActivity extends AppCompatActivity {
             else {
                     Intent intent = new Intent(FullImageActivity.this, MapsActivity.class);
                     intent.setAction(Intent.ACTION_SEND);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     intent.putExtra("MAP_latitude", String.valueOf(latitude));
                     intent.putExtra("MAP_longitude", String.valueOf(longitude));
                     intent.putExtra("MAP_place_name", placeName);
@@ -98,11 +99,5 @@ public class FullImageActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
         });
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        onBackPressed();
-        return true;
     }
 }

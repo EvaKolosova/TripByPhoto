@@ -110,7 +110,7 @@ public class MapsActivity extends AppCompatActivity {
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(mapboxMap -> {
             myMapboxMap = mapboxMap;
-            myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(countryName).setSnippet(placeName));
+            myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName));
             myMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"), style -> {
                 int blue = Color.parseColor("#FF4A8FE1");
                 float alpfa = 1f;
@@ -132,11 +132,11 @@ public class MapsActivity extends AppCompatActivity {
                 getRoute(style, origin, destination);
                 mapView.addOnDidFinishLoadingStyleListener(() -> {
                     Log.i("kolosova_checkInfo", "map's style has changed");
-                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(countryName).setSnippet(placeName));
+                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName));
                 });
                 mapView.addOnDidFinishLoadingMapListener(() -> {
                     Log.i("kolosova_checkInfo", "map has loaded");
-                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(countryName).setSnippet(placeName));
+                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName));
                 });
 
                 myMapboxMap.addOnMapClickListener(point -> {
@@ -158,7 +158,7 @@ public class MapsActivity extends AppCompatActivity {
                             myMapboxMap.clear();
                         }
                         addMarkerOnMap(point);
-                        myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(countryName).setSnippet(placeName));
+                        myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName));
                         return true;
                     }
                 });
@@ -171,8 +171,8 @@ public class MapsActivity extends AppCompatActivity {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         GetInfo getInfo = new GetInfo();
         placeNameClick = getInfo.getPlaceFullName(geocoder, point);
-        countryNameClick = getInfo.getPlaceFullName(geocoder, point);
-        myMapboxMap.addMarker(new MarkerOptions().setTitle(countryNameClick).setSnippet(placeNameClick).position(point));
+        countryNameClick = getInfo.getCountryName(geocoder, point);
+        myMapboxMap.addMarker(new MarkerOptions().setTitle(placeNameClick).setSnippet(countryNameClick).position(point));
     }
 
     public Location getLocation() {

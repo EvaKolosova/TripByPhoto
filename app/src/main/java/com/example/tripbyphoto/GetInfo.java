@@ -33,6 +33,12 @@ public class GetInfo {
         String placeName = "";
         try {
             List<Address> addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
+            if(addresses.get(0).getThoroughfare() != null) {
+                placeName += addresses.get(0).getThoroughfare();
+                Log.d("kolosova_checkInfo", placeName);
+                if ((addresses.get(0).getLocality() != null) || addresses.get(0).getAdminArea() != null || addresses.get(0).getFeatureName() != null)
+                    placeName += ", ";
+            }
             if (addresses.get(0).getFeatureName() != null) {
                 placeName += addresses.get(0).getFeatureName();
                 Log.d("kolosova_checkInfo", placeName);
