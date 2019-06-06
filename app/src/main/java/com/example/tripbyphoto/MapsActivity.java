@@ -2,6 +2,7 @@ package com.example.tripbyphoto;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Geocoder;
@@ -73,6 +74,7 @@ public class MapsActivity extends AppCompatActivity {
     private LatLng pointOfDestination;
     private Context context;
     private NavigationMapRoute navigationMapRoute;
+    protected boolean FLAG_CONNECTION_STATUS_ACTIVE = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,14 +138,29 @@ public class MapsActivity extends AppCompatActivity {
                     Log.i("kolosova_checkInfo", "map has loaded");
                     myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(countryName).setSnippet(placeName));
                 });
+
                 myMapboxMap.addOnMapClickListener(point -> {
-                    Log.d("kolosova_checkInfo", "inside");
-                    if (!myMapboxMap.getMarkers().isEmpty()) {
-                        myMapboxMap.clear();
+                    if (!GetInfo.isOnline(this)) {
+                        Toast.makeText(getApplicationContext(),
+                                "No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
+                        FLAG_CONNECTION_STATUS_ACTIVE = false;
+                        return false;
+                    } else if(!GetInfo.isGPSon(context)) {
+                        Toast.makeText(getApplicationContext(),"No GPS connection! Please, activate device location!", Toast.LENGTH_LONG).show();
+                        FLAG_CONNECTION_STATUS_ACTIVE = false;
+                        return false;
                     }
-                    addMarkerOnMap(point);
-                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(countryName).setSnippet(placeName));
-                    return true;
+                    else {
+                        if( FLAG_CONNECTION_STATUS_ACTIVE == false && currentRoute == null)
+                            restartActivity();
+                        Log.d("kolosova_checkInfo", "on map click");
+                        if (!myMapboxMap.getMarkers().isEmpty()) {
+                            myMapboxMap.clear();
+                        }
+                        addMarkerOnMap(point);
+                        myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(countryName).setSnippet(placeName));
+                        return true;
+                    }
                 });
             });
         });
@@ -193,14 +210,16 @@ public class MapsActivity extends AppCompatActivity {
                 this.canGetLocation = true;
                 if (isNetworkEnabled) {
                     location = null;
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                            && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         return null;
                     }
                     locationComponent.setLocationComponentEnabled(true);
                     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
                     Log.d("Network", "Network");
                     if (locationManager != null) {
-                        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                             return null;
                         }
                         location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -212,17 +231,14 @@ public class MapsActivity extends AppCompatActivity {
                 }
                 if (isGPSEnabled) {
                     location = null;
-                    if (location == null) {
-                        locationComponent.setLocationComponentEnabled(true);
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
-                        Log.d("GPS Enabled", "GPS Enabled");
-                        if (locationManager != null) {
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                            if (location != null) {
-                                deviceLatitude = location.getLatitude();
-                                deviceLongitude = location.getLongitude();
-                            }
+                    locationComponent.setLocationComponentEnabled(true);
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
+                    Log.d("GPS Enabled", "GPS Enabled");
+                    if (locationManager != null) {
+                        location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        if (location != null) {
+                            deviceLatitude = location.getLatitude();
+                            deviceLongitude = location.getLongitude();
                         }
                     }
                 }
@@ -237,13 +253,22 @@ public class MapsActivity extends AppCompatActivity {
     }
 
     public void startNavigationClick(View view) {
-        Log.d("kolosova_checkInfo", "button is clicked");
-        NavigationLauncherOptions options = NavigationLauncherOptions.builder()
-                .directionsRoute(currentRoute)
-                //.shouldSimulateRoute(true) //for checking routeNavigationFunctions
-                .build();
-
-        NavigationLauncher.startNavigation(MapsActivity.this, options);
+        if (!GetInfo.isOnline(this)) {
+            Toast.makeText(getApplicationContext(),
+                    "No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
+            FLAG_CONNECTION_STATUS_ACTIVE = false;
+        } else if(!GetInfo.isGPSon(context)) {
+            Toast.makeText(getApplicationContext(),"No GPS connection! Please, activate device location!", Toast.LENGTH_LONG).show();
+            FLAG_CONNECTION_STATUS_ACTIVE = false;
+        }
+        else {
+            Log.d("kolosova_checkInfo", "button is clicked");
+            NavigationLauncherOptions options = NavigationLauncherOptions.builder()
+                    .directionsRoute(currentRoute)
+                    //.shouldSimulateRoute(true) //for checking routeNavigationFunctions
+                    .build();
+            NavigationLauncher.startNavigation(MapsActivity.this, options);
+        }
     }
 
     private void getRoute(@NonNull final Style style, Point origin, Point destination) {
@@ -251,7 +276,7 @@ public class MapsActivity extends AppCompatActivity {
         // более быстрый вариант отрисовки пути, но это лишь синяя линия без учета пробок и она может отличаться от маршрута, который будет строиться для конечной навигации,
         // использование GeoJSON обьекта для рисования пути.
         // при тестирование на физическом нужно раскоменчивать :(
-        client = MapboxDirections.builder()
+        /*client = MapboxDirections.builder()
                 .origin(origin)
                 .destination(destination)
                 .overview(DirectionsCriteria.OVERVIEW_FULL)
@@ -295,7 +320,7 @@ public class MapsActivity extends AppCompatActivity {
                 Toast.makeText(MapsActivity.this, "Error: " + throwable.getMessage(),
                         Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
         // endregion
 
         NavigationRoute.builder(this)
@@ -418,5 +443,11 @@ public class MapsActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
         return true;
+    }
+
+    public void restartActivity(){
+        Intent mIntent = getIntent();
+        finish();
+        startActivity(mIntent);
     }
 }

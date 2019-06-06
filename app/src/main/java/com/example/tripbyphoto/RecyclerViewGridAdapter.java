@@ -37,7 +37,7 @@ public class RecyclerViewGridAdapter extends RecyclerView.Adapter<RecyclerViewGr
         return new ViewHolder(view);
     }
 
-    // binds the data to the ImageView in each row
+    // binds data to the ImageView in each row
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
 

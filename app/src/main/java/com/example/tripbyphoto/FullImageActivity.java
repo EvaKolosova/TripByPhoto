@@ -1,14 +1,17 @@
 package com.example.tripbyphoto;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Geocoder;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
@@ -49,8 +52,8 @@ public class FullImageActivity extends AppCompatActivity {
             textViewLocation.append(longitudeString);
         }
 
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         GetInfo getInfo = new GetInfo();
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         LatLng point = new LatLng(latitude, longitude);
         countryName = getInfo.getCountryName(geocoder, point);
         placeName = getInfo.getPlaceFullName(geocoder, point);
@@ -75,14 +78,25 @@ public class FullImageActivity extends AppCompatActivity {
             }
         }
 
+        Context context = this;
+
         imageView.setOnClickListener(v -> {
-            Intent intent = new Intent(FullImageActivity.this, MapsActivity.class);
-            intent.setAction(Intent.ACTION_SEND);
-            intent.putExtra("MAP_latitude", String.valueOf(latitude));
-            intent.putExtra("MAP_longitude", String.valueOf(longitude));
-            intent.putExtra("MAP_place_name", placeName);
-            intent.putExtra("MAP_country_name", countryName);
-            startActivity(intent);
+            if (!GetInfo.isOnline(this)) {
+                Toast.makeText(getApplicationContext(),"No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
+                return;
+            } else if (!GetInfo.isGPSon(context)) {
+                Toast.makeText(getApplicationContext(),"No GPS connection! Please, activate device location!", Toast.LENGTH_LONG).show();
+                return;
+            }
+            else {
+                    Intent intent = new Intent(FullImageActivity.this, MapsActivity.class);
+                    intent.setAction(Intent.ACTION_SEND);
+                    intent.putExtra("MAP_latitude", String.valueOf(latitude));
+                    intent.putExtra("MAP_longitude", String.valueOf(longitude));
+                    intent.putExtra("MAP_place_name", placeName);
+                    intent.putExtra("MAP_country_name", countryName);
+                    startActivity(intent);
+                }
         });
     }
 

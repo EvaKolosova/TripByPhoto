@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -23,15 +24,24 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Double> locationLongitude = new ArrayList<>();// list of latitude & longitude
     private ArrayList<String> imagePaths = new ArrayList<>();// list of files paths
     RecyclerViewGridAdapter.OnItemClickListener onItemClickListener = (View view, int position, String name) -> {
-        Intent intent = new Intent(MainActivity.this, FullImageActivity.class);
-        intent.setAction(android.content.Intent.ACTION_SEND);
-        path = imagePaths.get(position);
-        latitude = String.valueOf(locationLatitude.get(position));
-        longitude = String.valueOf(locationLongitude.get(position));
-        intent.putExtra("imageUri", path);
-        intent.putExtra("latitude", latitude);
-        intent.putExtra("longitude", longitude);
-        startActivity(intent);
+        if (!GetInfo.isOnline(this)) {
+            Toast.makeText(getApplicationContext(),
+                    "No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
+            return;
+        } else {
+            Intent i = new Intent(this, this.getClass());
+            finish();
+            this.startActivity(i);
+            Intent intent = new Intent(MainActivity.this, FullImageActivity.class);
+            intent.setAction(android.content.Intent.ACTION_SEND);
+            path = imagePaths.get(position);
+            latitude = String.valueOf(locationLatitude.get(position));
+            longitude = String.valueOf(locationLongitude.get(position));
+            intent.putExtra("imageUri", path);
+            intent.putExtra("latitude", latitude);
+            intent.putExtra("longitude", longitude);
+            startActivity(intent);
+        }
     };
 
     @Override
@@ -59,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
             }
             cursor.close();
         }
+
         imageGrid = findViewById(R.id.rvGridRecycler);
         imageGrid.setLayoutManager(new GridLayoutManager(MainActivity.this, 2));
         adapter = new RecyclerViewGridAdapter(MainActivity.this, imagePaths, locationLatitude, locationLongitude, onItemClickListener);
@@ -76,6 +87,17 @@ public class MainActivity extends AppCompatActivity {
         i.addCategory(Intent.CATEGORY_HOME);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        GetInfo getInfo = new GetInfo();
+        if (!GetInfo.isOnline(this)) {
+            Toast.makeText(getApplicationContext(),
+                    "No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
+            return;
+        }
     }
 }
 
