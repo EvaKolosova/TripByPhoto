@@ -16,7 +16,34 @@
         mapbox:mapbox_cameraTargetLng="43.99155"
         mapbox:mapbox_cameraZoom="0.5"
         tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp" />
+        tools:layout_editor_absoluteY="0dp" >
+
+        <fragment
+            android:id="@+id/fragment"
+            android:name="com.mapbox.mapboxsdk.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="90dp" />
+
+        <EditText
+            android:id="@+id/etDeparture"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="Departure"
+            android:inputType="textAutoCorrect"
+            android:layout_marginTop="@dimen/null_dimen" />
+
+        <EditText
+            android:id="@+id/etDestination"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Destination"
+            android:inputType="textPersonName"
+            android:layout_marginTop="@dimen/textview_height"/>
+
+    </com.mapbox.mapboxsdk.maps.MapView>
 
     <Button
         android:id="@+id/startButton"

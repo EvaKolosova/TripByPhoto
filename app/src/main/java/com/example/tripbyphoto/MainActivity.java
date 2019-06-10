@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, null);
         if (cursor != null) {
+            cursor.moveToFirst();
             while (cursor.moveToNext()) {
                 try {
                     //filter for images without location-data
