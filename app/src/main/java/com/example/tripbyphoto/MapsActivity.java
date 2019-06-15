@@ -4,21 +4,33 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.inputmethodservice.Keyboard;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -31,6 +43,8 @@ import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
@@ -65,6 +79,7 @@ public class MapsActivity extends AppCompatActivity {
     private LocationManager locationManager;
     private Location location;
     private Button startNavigationButton;
+    private EditText etDeparture, etDestination;
     private Double latitude, longitude, deviceLatitude, deviceLongitude;
     private LocationComponent locationComponent;
     private MapView mapView;
@@ -102,15 +117,19 @@ public class MapsActivity extends AppCompatActivity {
         if (getIntent().hasExtra("MAP_country_name")) {
             countryName = getIntent().getStringExtra("MAP_country_name");
         }
+        etDeparture = findViewById(R.id.etDeparture);
+        etDestination = findViewById(R.id.etDestination);
         pointOfDestination = new LatLng(latitude, longitude);
         mapView = findViewById(R.id.mapView);
         startNavigationButton = findViewById(R.id.startButton);
         context = this;
 
+        Icon icon = drawableToIcon(context, R.drawable.mapbox_marker_icon_default, Color.parseColor("#FF3C9AA4"));
+
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(mapboxMap -> {
             myMapboxMap = mapboxMap;
-            myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName));
+            myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
             myMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"), style -> {
                 int blue = Color.parseColor("#FF4A8FE1");
                 float alpfa = 1f;
@@ -132,11 +151,11 @@ public class MapsActivity extends AppCompatActivity {
                 getRoute(style, origin, destination);
                 mapView.addOnDidFinishLoadingStyleListener(() -> {
                     Log.i("kolosova_checkInfo", "map's style has changed");
-                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName));
+                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));  //(IconFactory.getInstance(this).fromResource(R.drawable.map_marker_dark)));
                 });
                 mapView.addOnDidFinishLoadingMapListener(() -> {
                     Log.i("kolosova_checkInfo", "map has loaded");
-                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName));
+                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
                 });
 
                 myMapboxMap.addOnMapClickListener(point -> {
@@ -149,8 +168,7 @@ public class MapsActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(),"No GPS connection! Please, activate device location!", Toast.LENGTH_LONG).show();
                         FLAG_CONNECTION_STATUS_ACTIVE = false;
                         return false;
-                    }
-                    else {
+                    } else {
                         if( FLAG_CONNECTION_STATUS_ACTIVE == false && currentRoute == null)
                             restartActivity();
                         Log.d("kolosova_checkInfo", "on map click");
@@ -158,12 +176,36 @@ public class MapsActivity extends AppCompatActivity {
                             myMapboxMap.clear();
                         }
                         addMarkerOnMap(point);
-                        myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName));
+                        myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
                         return true;
                     }
                 });
             });
         });
+
+        etDestination.setOnKeyListener((v, keyCode, event) -> {
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
+                hideKeyboard();
+                return false;
+            }
+            return false;
+        });
+    }
+
+    public static Icon drawableToIcon(@NonNull Context context, @DrawableRes int id, @ColorInt int colorRes) {
+        Drawable vectorDrawable = ResourcesCompat.getDrawable(context.getResources(), id, context.getTheme());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        DrawableCompat.setTint(vectorDrawable, colorRes);
+        vectorDrawable.draw(canvas);
+        return IconFactory.getInstance(context).fromBitmap(bitmap);
+    }
+
+    public void hideKeyboard() {
+        InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
     private void addMarkerOnMap(@NonNull LatLng point) {
@@ -172,7 +214,11 @@ public class MapsActivity extends AppCompatActivity {
         GetInfo getInfo = new GetInfo();
         placeNameClick = getInfo.getPlaceFullName(geocoder, point);
         countryNameClick = getInfo.getCountryName(geocoder, point);
-        myMapboxMap.addMarker(new MarkerOptions().setTitle(placeNameClick).setSnippet(countryNameClick).position(point));
+        if (countryNameClick != "")
+            myMapboxMap.addMarker(new MarkerOptions().setTitle(placeNameClick)
+                    .setSnippet(countryNameClick)
+                    .position(point));
+        else myMapboxMap.addMarker(new MarkerOptions().setTitle(placeNameClick).position(point));
     }
 
     public Location getLocation() {

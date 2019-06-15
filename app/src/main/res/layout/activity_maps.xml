@@ -28,10 +28,12 @@
             android:id="@+id/etDeparture"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:ems="10"
+            android:singleLine="true"
             android:hint="Departure"
             android:inputType="textAutoCorrect"
+            android:textColor="@color/colorPrimaryDark"
+            android:imeOptions="actionSearch"
             android:layout_marginTop="@dimen/null_dimen" />
 
         <EditText
@@ -39,8 +41,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
+            android:singleLine="true"
             android:hint="Destination"
-            android:inputType="textPersonName"
+            android:inputType="textAutoCorrect"
+            android:imeOptions="actionGo"
+            android:textColor="@color/colorPrimaryDark"
             android:layout_marginTop="@dimen/textview_height"/>
 
     </com.mapbox.mapboxsdk.maps.MapView>

@@ -21,7 +21,9 @@ public class GetInfo {
         String countryName = "";
         try {
             List<Address> addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
-            countryName = addresses.get(0).getCountryName();
+
+            if (addresses.get(0).getCountryName() != null)
+                countryName = addresses.get(0).getCountryName();
             Log.d("kolosova_checkInfo", countryName);
         } catch (IOException e) {
             e.printStackTrace();
@@ -33,13 +35,13 @@ public class GetInfo {
         String placeName = "";
         try {
             List<Address> addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
-            if(addresses.get(0).getThoroughfare() != null) {
+            if (addresses.get(0).getThoroughfare() != null && !addresses.get(0).getThoroughfare().equals("Unnamed Road")) {
                 placeName += addresses.get(0).getThoroughfare();
                 Log.d("kolosova_checkInfo", placeName);
                 if ((addresses.get(0).getLocality() != null) || addresses.get(0).getAdminArea() != null || addresses.get(0).getFeatureName() != null)
                     placeName += ", ";
             }
-            if (addresses.get(0).getFeatureName() != null) {
+            if (addresses.get(0).getFeatureName() != null && !addresses.get(0).getFeatureName().equals("Unnamed Road")) {
                 placeName += addresses.get(0).getFeatureName();
                 Log.d("kolosova_checkInfo", placeName);
                 if ((addresses.get(0).getLocality() != null) || addresses.get(0).getAdminArea() != null)

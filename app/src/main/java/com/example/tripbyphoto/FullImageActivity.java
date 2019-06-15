@@ -4,11 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Geocoder;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -62,16 +60,17 @@ public class FullImageActivity extends AppCompatActivity {
         if (orientation == Configuration.ORIENTATION_LANDSCAPE)
             textViewLocation.append(", " + placeName);
         else textViewLocation.append("\n " + placeName);
+        if (countryName != "") textViewLocation.append(", " + countryName);
 
         Integer textLength = textViewLocation.getText().length();
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            if (textLength > 75) {
+            if (textLength > 82) {
                 textViewLocation.getLayoutParams().height *= 2;
             }
         } else {
-            if (textLength > 40 && textLength < 80) {
+            if (textLength > 42 && textLength < 84) {
                 textViewLocation.getLayoutParams().height *= 2;
-            } else if (textLength > 80 && textLength < 120) {
+            } else if (textLength > 84 && textLength < 126) {
                 textViewLocation.getLayoutParams().height *= 3;
             } else {
                 textViewLocation.getLayoutParams().height *= 4;
@@ -82,22 +81,28 @@ public class FullImageActivity extends AppCompatActivity {
 
         imageView.setOnClickListener(v -> {
             if (!GetInfo.isOnline(this)) {
-                Toast.makeText(getApplicationContext(),"No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
                 return;
             } else if (!GetInfo.isGPSon(context)) {
-                Toast.makeText(getApplicationContext(),"No GPS connection! Please, activate device location!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "No GPS connection! Please, activate device location!", Toast.LENGTH_LONG).show();
                 return;
+            } else {
+                Intent intent = new Intent(FullImageActivity.this, MapsActivity.class);
+                intent.setAction(Intent.ACTION_SEND);
+                intent.putExtra("MAP_latitude", String.valueOf(latitude));
+                intent.putExtra("MAP_longitude", String.valueOf(longitude));
+                intent.putExtra("MAP_place_name", placeName);
+                intent.putExtra("MAP_country_name", countryName);
+                startActivity(intent);
             }
-            else {
-                    Intent intent = new Intent(FullImageActivity.this, MapsActivity.class);
-                    intent.setAction(Intent.ACTION_SEND);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    intent.putExtra("MAP_latitude", String.valueOf(latitude));
-                    intent.putExtra("MAP_longitude", String.valueOf(longitude));
-                    intent.putExtra("MAP_place_name", placeName);
-                    intent.putExtra("MAP_country_name", countryName);
-                    startActivity(intent);
-                }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent i = new Intent(FullImageActivity.this, MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(i);
+        super.onBackPressed();
     }
 }

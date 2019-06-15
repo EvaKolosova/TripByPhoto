@@ -86,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
         //эмулируется нажатие на HOME, сворачивая приложение
         Intent i = new Intent(Intent.ACTION_MAIN);
         i.addCategory(Intent.CATEGORY_HOME);
-        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
     }
 
