@@ -180,6 +180,13 @@ public class MapsActivity extends AppCompatActivity {
                         return true;
                     }
                 });
+
+                myMapboxMap.addOnMapLongClickListener(point -> {
+                    Intent intent = new Intent(MapsActivity.this, testActivity.class);
+                    intent.setAction(Intent.ACTION_SEND);
+                    startActivity(intent);
+                    return false;
+                });
             });
         });
 
