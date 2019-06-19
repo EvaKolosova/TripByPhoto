@@ -22,7 +22,7 @@
     <dimen name="null_dimen">0dp</dimen>
 
     <dimen name="text_location_width">320dp</dimen>
-    <dimen name="text_land_location_width">580dp</dimen>
+    <dimen name="text_land_location_width">585dp</dimen>
     <dimen name="text_location_height">75dp</dimen>
     <dimen name="text_description_height">50dp</dimen>
     <dimen name="text_button_height">30dp</dimen>

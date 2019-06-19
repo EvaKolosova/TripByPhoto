@@ -11,4 +11,5 @@
     <color name="colorMy2">#21AAF3</color>
     <color name="colorGrey">#B5FFFFFF</color>
     <color name="colorGreyText">#879199</color>
+    <color name="background">#FFEFE8E0</color>
 </resources>

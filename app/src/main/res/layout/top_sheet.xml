@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/top_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:background="@android:color/darker_gray"
+    android:orientation="vertical"
+    app:behavior_hideable="false"
+    app:behavior_peekHeight="10dp"
+    android:backgroundTint="@color/background"
+    app:layout_behavior="com.example.tripbyphoto.TopSheetBehavior">
+
+    <EditText
+        android:id="@+id/etDeparture"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:ems="10"
+        android:hint="Departure"
+        android:imeOptions="actionSearch"
+        android:inputType="textAutoCorrect"
+        android:singleLine="true"
+        android:textColor="@color/colorPrimaryDark" />
+
+    <EditText
+        android:id="@+id/etDestination"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:ems="10"
+        android:hint="Destination"
+        android:imeOptions="actionGo"
+        android:inputType="textAutoCorrect"
+        android:singleLine="true"
+        android:textColor="@color/colorPrimaryDark" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:layout_below="@+id/toolbar"
+        android:layout_marginTop="@dimen/null_dimen"
+        android:background="@drawable/toolbar_dropshadow" />
+
+</LinearLayout>

@@ -282,6 +282,10 @@ public class TopSheetBehavior<V extends View> extends CoordinatorLayout.Behavior
         if (mState == STATE_DRAGGING && action == MotionEvent.ACTION_DOWN) {
             return true;
         }
+        if (mViewDragHelper == null) {
+            //mViewDragHelper = ViewDragHelper.create(parent, mDragCallback);
+            return false;
+        }
         mViewDragHelper.processTouchEvent(event);
         // Record the velocity
         if (action == MotionEvent.ACTION_DOWN) {
@@ -741,8 +745,7 @@ public class TopSheetBehavior<V extends View> extends CoordinatorLayout.Behavior
         CoordinatorLayout.Behavior behavior = ((CoordinatorLayout.LayoutParams) params)
                 .getBehavior();
         if (!(behavior instanceof TopSheetBehavior)) {
-            throw new IllegalArgumentException(
-                    "The view is not associated with TopSheetBehavior");
+            throw new IllegalArgumentException("The view is not associated with TopSheetBehavior");
         }
         return (TopSheetBehavior<V>) behavior;
     }

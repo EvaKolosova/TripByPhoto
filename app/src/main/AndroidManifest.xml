@@ -9,19 +9,23 @@
 
     <application
         android:allowBackup="true"
-        android:hardwareAccelerated="true"
+        android:hardwareAccelerated="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".testActivity"></activity>
+        <activity
+            android:name=".testActivity"
+            android:hardwareAccelerated="true"></activity>
         <activity
             android:name=".FullImageActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"
+            android:hardwareAccelerated="true" />
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps" />
+            android:label="@string/title_activity_maps"
+            android:hardwareAccelerated="true" />
         <activity
             android:name=".LoadingActivity"
             android:screenOrientation="portrait"
@@ -34,6 +38,7 @@
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
+            android:hardwareAccelerated="true"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

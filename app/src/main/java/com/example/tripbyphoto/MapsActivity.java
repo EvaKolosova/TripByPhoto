@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.inputmethodservice.Keyboard;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
@@ -18,7 +17,6 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -31,21 +29,18 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
-import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.core.constants.Constants;
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
@@ -55,7 +50,6 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -66,30 +60,40 @@ import java.util.Locale;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
 public class MapsActivity extends AppCompatActivity {
     private static final String TAG = "DirectionsInfo";
-    private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 10 meters  // The minimum distance to change Updates in meters
-    private static final long MIN_TIME_BW_UPDATES = 1; // 1 minute  // The minimum time between updates in milliseconds
+    private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
+    private static final long MIN_TIME_BW_UPDATES = 1;
     protected MapboxMap myMapboxMap;
     protected String placeName, countryName;
+    protected boolean FLAG_CONNECTION_STATUS_ACTIVE = true;
     private String placeNameClick, countryNameClick;
     private boolean isGPSEnabled = false, isNetworkEnabled = false, canGetLocation = false;
     private LocationManager locationManager;
     private Location location;
     private Button startNavigationButton;
     private EditText etDeparture, etDestination;
-    private Double latitude, longitude, deviceLatitude, deviceLongitude;
+    private Double photoLatitude, photoLongitude, deviceLatitude, deviceLongitude;
     private LocationComponent locationComponent;
     private MapView mapView;
     private DirectionsRoute currentRoute = null;
-    private MapboxDirections client;
     private Point origin, destination;
     private LatLng pointOfDestination;
     private Context context;
     private NavigationMapRoute navigationMapRoute;
-    protected boolean FLAG_CONNECTION_STATUS_ACTIVE = true;
+    private CameraPosition position;
+
+    public static Icon drawableToIcon(@NonNull Context context, @DrawableRes int id, @ColorInt int colorRes) {
+        Drawable vectorDrawable = ResourcesCompat.getDrawable(context.getResources(), id, context.getTheme());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        DrawableCompat.setTint(vectorDrawable, colorRes);
+        vectorDrawable.draw(canvas);
+        return IconFactory.getInstance(context).fromBitmap(bitmap);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,14 +104,32 @@ public class MapsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_maps);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        LinearLayout llTopSheet = findViewById(R.id.top_sheet);
+        TopSheetBehavior topSheetBehavior = TopSheetBehavior.from(llTopSheet);
+        topSheetBehavior.setState(TopSheetBehavior.STATE_COLLAPSED);
+        topSheetBehavior.setState(TopSheetBehavior.STATE_EXPANDED);
+        topSheetBehavior.setState(TopSheetBehavior.STATE_HIDDEN);
+        topSheetBehavior.setPeekHeight(200);
+        topSheetBehavior.setHideable(false);
+        topSheetBehavior.setPeekHeight(30);
+        topSheetBehavior.setTopSheetCallback(new TopSheetBehavior.TopSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View topSheet, int newState) {
+            }
+
+            @Override
+            public void onSlide(@NonNull View topSheet, float slideOffset) {
+            }
+        });
+
         if (getIntent().hasExtra("MAP_latitude")) {
             String latitudeString = getIntent().getStringExtra("MAP_latitude");
-            latitude = Double.parseDouble(latitudeString);
+            photoLatitude = Double.parseDouble(latitudeString);
         }
 
         if (getIntent().hasExtra("MAP_longitude")) {
             String longitudeString = getIntent().getStringExtra("MAP_longitude");
-            longitude = Double.parseDouble(longitudeString);
+            photoLongitude = Double.parseDouble(longitudeString);
         }
 
         if (getIntent().hasExtra("MAP_place_name")) {
@@ -119,7 +141,7 @@ public class MapsActivity extends AppCompatActivity {
         }
         etDeparture = findViewById(R.id.etDeparture);
         etDestination = findViewById(R.id.etDestination);
-        pointOfDestination = new LatLng(latitude, longitude);
+        pointOfDestination = new LatLng(photoLatitude, photoLongitude);
         mapView = findViewById(R.id.mapView);
         startNavigationButton = findViewById(R.id.startButton);
         context = this;
@@ -147,7 +169,7 @@ public class MapsActivity extends AppCompatActivity {
                 locationComponent.activateLocationComponent(locationComponentActivationOptions);
                 getLocation();
                 origin = Point.fromLngLat(deviceLongitude, deviceLatitude);
-                destination = Point.fromLngLat(longitude, latitude);
+                destination = Point.fromLngLat(photoLongitude, photoLatitude);
                 getRoute(style, origin, destination);
                 mapView.addOnDidFinishLoadingStyleListener(() -> {
                     Log.i("kolosova_checkInfo", "map's style has changed");
@@ -164,12 +186,12 @@ public class MapsActivity extends AppCompatActivity {
                                 "No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
                         FLAG_CONNECTION_STATUS_ACTIVE = false;
                         return false;
-                    } else if(!GetInfo.isGPSon(context)) {
-                        Toast.makeText(getApplicationContext(),"No GPS connection! Please, activate device location!", Toast.LENGTH_LONG).show();
+                    } else if (!GetInfo.isGPSon(context)) {
+                        Toast.makeText(getApplicationContext(), "No GPS connection! Please, activate device location!", Toast.LENGTH_LONG).show();
                         FLAG_CONNECTION_STATUS_ACTIVE = false;
                         return false;
                     } else {
-                        if( FLAG_CONNECTION_STATUS_ACTIVE == false && currentRoute == null)
+                        if (FLAG_CONNECTION_STATUS_ACTIVE == false && currentRoute == null)
                             restartActivity();
                         Log.d("kolosova_checkInfo", "on map click");
                         if (!myMapboxMap.getMarkers().isEmpty()) {
@@ -181,12 +203,20 @@ public class MapsActivity extends AppCompatActivity {
                     }
                 });
 
-                myMapboxMap.addOnMapLongClickListener(point -> {
-                    Intent intent = new Intent(MapsActivity.this, testActivity.class);
-                    intent.setAction(Intent.ACTION_SEND);
-                    startActivity(intent);
-                    return false;
-                });
+                position = new CameraPosition.Builder()
+                        .target(new LatLng(photoLatitude, photoLongitude))
+                        .zoom(2)
+                        .tilt(20)
+                        .build();
+                myMapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
+
+//                for checking TopSheetBehavior on the testActivity
+//                myMapboxMap.addOnMapLongClickListener(point -> {
+//                    Intent intent = new Intent(MapsActivity.this, testActivity.class);
+//                    intent.setAction(Intent.ACTION_SEND);
+//                    startActivity(intent);
+//                    return false;
+//                });
             });
         });
 
@@ -197,17 +227,6 @@ public class MapsActivity extends AppCompatActivity {
             }
             return false;
         });
-    }
-
-    public static Icon drawableToIcon(@NonNull Context context, @DrawableRes int id, @ColorInt int colorRes) {
-        Drawable vectorDrawable = ResourcesCompat.getDrawable(context.getResources(), id, context.getTheme());
-        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
-                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        DrawableCompat.setTint(vectorDrawable, colorRes);
-        vectorDrawable.draw(canvas);
-        return IconFactory.getInstance(context).fromBitmap(bitmap);
     }
 
     public void hideKeyboard() {
@@ -310,11 +329,10 @@ public class MapsActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),
                     "No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
             FLAG_CONNECTION_STATUS_ACTIVE = false;
-        } else if(!GetInfo.isGPSon(context)) {
-            Toast.makeText(getApplicationContext(),"No GPS connection! Please, activate device location!", Toast.LENGTH_LONG).show();
+        } else if (!GetInfo.isGPSon(context)) {
+            Toast.makeText(getApplicationContext(), "No GPS connection! Please, activate device location!", Toast.LENGTH_LONG).show();
             FLAG_CONNECTION_STATUS_ACTIVE = false;
-        }
-        else {
+        } else {
             Log.d("kolosova_checkInfo", "button is clicked");
             NavigationLauncherOptions options = NavigationLauncherOptions.builder()
                     .directionsRoute(currentRoute)
@@ -325,57 +343,6 @@ public class MapsActivity extends AppCompatActivity {
     }
 
     private void getRoute(@NonNull final Style style, Point origin, Point destination) {
-        // region NAVIGATION QUICK ROUTE
-        // более быстрый вариант отрисовки пути, но это лишь синяя линия без учета пробок и она может отличаться от маршрута, который будет строиться для конечной навигации,
-        // использование GeoJSON обьекта для рисования пути.
-        // при тестирование на физическом нужно раскоменчивать :(
-        /*client = MapboxDirections.builder()
-                .origin(origin)
-                .destination(destination)
-                .overview(DirectionsCriteria.OVERVIEW_FULL)
-                .profile(DirectionsCriteria.PROFILE_DRIVING)
-                .accessToken(getString(R.string.access_token))
-                .build();
-
-        client.enqueueCall(new Callback<DirectionsResponse>() {
-            @Override
-            public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-                System.out.println(call.request().url().toString());
-
-                Timber.d("Response code: " + response.code());
-                if (response.body() == null) {
-                    Timber.e("No routes found, make sure you set the right user and access token.");
-                    return;
-                } else if (response.body().routes().size() < 1) {
-                    Timber.e("No routes found");
-                    return;
-                }
-
-                currentRoute = response.body().routes().get(0);
-
-                if (style.isFullyLoaded()) {
-                    // Retrieve and update the source designated for showing the directions route
-                    GeoJsonSource source = style.getSourceAs("route-source-id");
-
-                    // Create a LineString with the directions route's geometry and
-                    // reset the GeoJSON source for the route LineLayer source
-                    if (source != null) {
-                        Timber.d("onResponse: source != null");
-                        source.setGeoJson(FeatureCollection.fromFeature(
-                                Feature.fromGeometry(LineString.fromPolyline(currentRoute.geometry(), Constants.PRECISION_6))));
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-                Timber.e("Error: " + throwable.getMessage());
-                Toast.makeText(MapsActivity.this, "Error: " + throwable.getMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });*/
-        // endregion
-
         NavigationRoute.builder(this)
                 .accessToken(Mapbox.getAccessToken())
                 .origin(origin)
@@ -453,9 +420,6 @@ public class MapsActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (client != null) {
-            client.cancelCall();
-        }
         mapView.onDestroy();
     }
 
@@ -498,7 +462,7 @@ public class MapsActivity extends AppCompatActivity {
         return true;
     }
 
-    public void restartActivity(){
+    public void restartActivity() {
         Intent mIntent = getIntent();
         finish();
         startActivity(mIntent);
