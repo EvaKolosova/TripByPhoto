@@ -1,6 +1,7 @@
 package com.example.tripbyphoto;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,6 +13,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
@@ -20,20 +22,27 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.gson.JsonObject;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.geocoding.v5.models.CarmenFeature;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
@@ -50,6 +59,8 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete;
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -65,6 +76,7 @@ public class MapsActivity extends AppCompatActivity {
     private static final String TAG = "DirectionsInfo";
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
     private static final long MIN_TIME_BW_UPDATES = 1;
+    private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
     protected MapboxMap myMapboxMap;
     protected String placeName, countryName;
     protected boolean FLAG_CONNECTION_STATUS_ACTIVE = true;
@@ -73,16 +85,20 @@ public class MapsActivity extends AppCompatActivity {
     private LocationManager locationManager;
     private Location location;
     private Button startNavigationButton;
-    private EditText etDeparture, etDestination;
+    private EditText tvDeparture, tvDestination;
     private Double photoLatitude, photoLongitude, deviceLatitude, deviceLongitude;
     private LocationComponent locationComponent;
     private MapView mapView;
     private DirectionsRoute currentRoute = null;
     private Point origin, destination;
+    private String originName, destinationName;
     private LatLng pointOfDestination;
     private Context context;
     private NavigationMapRoute navigationMapRoute;
     private CameraPosition position;
+    private CarmenFeature photoLocation, deviceLocation;
+    private GridLayout llTopSheet;
+    private Icon icon;
 
     public static Icon drawableToIcon(@NonNull Context context, @DrawableRes int id, @ColorInt int colorRes) {
         Drawable vectorDrawable = ResourcesCompat.getDrawable(context.getResources(), id, context.getTheme());
@@ -104,14 +120,20 @@ public class MapsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_maps);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        LinearLayout llTopSheet = findViewById(R.id.top_sheet);
+        llTopSheet = findViewById(R.id.top_sheet);
+        tvDeparture = findViewById(R.id.tvDeparture);
+        tvDestination = findViewById(R.id.tvDestination);
+        mapView = findViewById(R.id.mapView);
+        startNavigationButton = findViewById(R.id.startButton);
+        context = this;
+
         TopSheetBehavior topSheetBehavior = TopSheetBehavior.from(llTopSheet);
         topSheetBehavior.setState(TopSheetBehavior.STATE_COLLAPSED);
         topSheetBehavior.setState(TopSheetBehavior.STATE_EXPANDED);
         topSheetBehavior.setState(TopSheetBehavior.STATE_HIDDEN);
         topSheetBehavior.setPeekHeight(200);
         topSheetBehavior.setHideable(false);
-        topSheetBehavior.setPeekHeight(30);
+        topSheetBehavior.setPeekHeight(40);
         topSheetBehavior.setTopSheetCallback(new TopSheetBehavior.TopSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View topSheet, int newState) {
@@ -139,14 +161,9 @@ public class MapsActivity extends AppCompatActivity {
         if (getIntent().hasExtra("MAP_country_name")) {
             countryName = getIntent().getStringExtra("MAP_country_name");
         }
-        etDeparture = findViewById(R.id.etDeparture);
-        etDestination = findViewById(R.id.etDestination);
         pointOfDestination = new LatLng(photoLatitude, photoLongitude);
-        mapView = findViewById(R.id.mapView);
-        startNavigationButton = findViewById(R.id.startButton);
-        context = this;
 
-        Icon icon = drawableToIcon(context, R.drawable.mapbox_marker_icon_default, Color.parseColor("#FF3C9AA4"));
+        icon = drawableToIcon(context, R.drawable.mapbox_marker_icon_default, Color.parseColor("#FF3C9AA4"));
 
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(mapboxMap -> {
@@ -180,6 +197,9 @@ public class MapsActivity extends AppCompatActivity {
                     myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
                 });
 
+                initSearchFab();
+                addUserLocations();
+
                 myMapboxMap.addOnMapClickListener(point -> {
                     if (!GetInfo.isOnline(this)) {
                         Toast.makeText(getApplicationContext(),
@@ -210,6 +230,14 @@ public class MapsActivity extends AppCompatActivity {
                         .build();
                 myMapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
 
+                GetInfo getInfo = new GetInfo();
+                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                LatLng point = new LatLng(deviceLatitude, deviceLongitude);
+                originName = getInfo.getPlaceFullName(geocoder, point) + ", " + getInfo.getCountryName(geocoder, point);
+                destinationName = placeName + ", " + countryName;
+                tvDeparture.setText(originName);
+                tvDestination.setText(destinationName);
+
 //                for checking TopSheetBehavior on the testActivity
 //                myMapboxMap.addOnMapLongClickListener(point -> {
 //                    Intent intent = new Intent(MapsActivity.this, testActivity.class);
@@ -220,18 +248,58 @@ public class MapsActivity extends AppCompatActivity {
             });
         });
 
-        etDestination.setOnKeyListener((v, keyCode, event) -> {
-            if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
-                hideKeyboard();
-                return false;
-            }
-            return false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { // API 21
+            tvDestination.setShowSoftInputOnFocus(false);
+            tvDeparture.setShowSoftInputOnFocus(false);
+        } else { // API 11-20
+            tvDestination.setTextIsSelectable(true);
+            tvDeparture.setTextIsSelectable(true);
+
+        }
+    }
+
+    private void initSearchFab() {
+        findViewById(R.id.fab_location_search1).setOnClickListener(view -> {
+            Intent intent = new PlaceAutocomplete.IntentBuilder()
+                    .accessToken(Mapbox.getAccessToken())
+                    .placeOptions(PlaceOptions.builder()
+                            .backgroundColor(Color.parseColor("#FFEFE8E0"))
+                            .limit(10)
+                            .addInjectedFeature(deviceLocation)
+                            .addInjectedFeature(photoLocation)
+                            .build(PlaceOptions.MODE_CARDS))
+                    .build(MapsActivity.this);
+            startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
+        });
+
+        findViewById(R.id.fab_location_search2).setOnClickListener(view -> {
+            Intent intent = new PlaceAutocomplete.IntentBuilder()
+                    .accessToken(Mapbox.getAccessToken())
+                    .placeOptions(PlaceOptions.builder()
+                            .backgroundColor(Color.parseColor("#FFEFE8E0"))
+                            .limit(10)
+                            .addInjectedFeature(deviceLocation)
+                            .addInjectedFeature(photoLocation)
+                            .build(PlaceOptions.MODE_CARDS))
+                    .build(MapsActivity.this);
+            startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
         });
     }
 
-    public void hideKeyboard() {
-        InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    private void addUserLocations() {
+        deviceLocation = CarmenFeature.builder().text("Device location")
+                .geometry(Point.fromLngLat(deviceLongitude, deviceLatitude))
+                .placeName("User location")
+                .id("mapbox-sf")
+                .properties(new JsonObject())
+                .build();
+
+        photoLocation = CarmenFeature.builder().text("Photo location")
+                .geometry(Point.fromLngLat(deviceLongitude, deviceLatitude))
+                .placeName("Photo location")
+                .id("mapbox-sf")
+                .properties(new JsonObject())
+                .build();
     }
 
     private void addMarkerOnMap(@NonNull LatLng point) {

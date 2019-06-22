@@ -15,30 +15,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".SearchActivity"></activity>
         <activity
             android:name=".testActivity"
-            android:hardwareAccelerated="true"></activity>
+            android:hardwareAccelerated="true" />
         <activity
             android:name=".FullImageActivity"
-            android:parentActivityName=".MainActivity"
-            android:hardwareAccelerated="true" />
+            android:hardwareAccelerated="true"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"
-            android:hardwareAccelerated="true" />
+            android:hardwareAccelerated="true"
+            android:label="@string/title_activity_maps" />
         <activity
             android:name=".LoadingActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".MainActivity"
-            android:launchMode="singleTop"
             android:hardwareAccelerated="true"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

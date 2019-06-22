@@ -17,15 +17,18 @@
         mapbox:mapbox_cameraTargetLat="40.73581"
         mapbox:mapbox_cameraTargetLng="43.99155"
         mapbox:mapbox_cameraZoom="0.5"
-        tools:layout_editor_absoluteX="-16dp"></com.mapbox.mapboxsdk.maps.MapView>
+        tools:layout_editor_absoluteX="0dp"></com.mapbox.mapboxsdk.maps.MapView>
 
     <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
+        android:layout_marginTop="@dimen/null_dimen"
         android:id="@+id/coordinator"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".testActivity">
+        tools:context=".testActivity"
+        tools:layout_editor_absoluteX="-8dp"
+        tools:layout_editor_absoluteY="-8dp">
 
         <include
             layout="@layout/top_sheet"
@@ -58,7 +61,6 @@
         mapbox:layout_constraintEnd_toEndOf="parent"
         mapbox:layout_constraintHorizontal_bias="0.497"
         mapbox:layout_constraintStart_toStartOf="parent"
-        mapbox:layout_constraintTop_toTopOf="@+id/include"
         mapbox:layout_constraintVertical_bias="0.988" />
 
 </android.support.constraint.ConstraintLayout>
