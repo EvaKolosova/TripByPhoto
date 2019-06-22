@@ -33,7 +33,7 @@
         <include
             layout="@layout/top_sheet"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
+            android:layout_height="135dp"
             app:layout_behavior="com.example.tripbyphoto.TopSheetBehavior" />
 
     </android.support.design.widget.CoordinatorLayout>

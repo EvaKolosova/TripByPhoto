@@ -76,4 +76,21 @@ public class GetInfo {
         }
         return placeName;
     }
+
+    public LatLng getLatlngFromPlaceName(Geocoder geocoder, @NonNull String placeName) {
+        try {
+            List<Address> addresses = geocoder.getFromLocationName(placeName, 1);
+
+            if (!addresses.isEmpty()) {
+                Double longitude = addresses.get(0).getLongitude();
+                Double latitude = addresses.get(0).getLatitude();
+                LatLng latLng = new LatLng(latitude, longitude);
+
+                return latLng;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

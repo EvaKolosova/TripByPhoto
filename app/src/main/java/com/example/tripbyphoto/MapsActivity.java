@@ -1,10 +1,10 @@
 package com.example.tripbyphoto;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -22,21 +22,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.gson.JsonObject;
@@ -76,7 +69,8 @@ public class MapsActivity extends AppCompatActivity {
     private static final String TAG = "DirectionsInfo";
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
     private static final long MIN_TIME_BW_UPDATES = 1;
-    private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
+    private static final int REQUEST_CODE_AUTOCOMPLETE_1 = 1;
+    private static final int REQUEST_CODE_AUTOCOMPLETE_2 = 2;
     protected MapboxMap myMapboxMap;
     protected String placeName, countryName;
     protected boolean FLAG_CONNECTION_STATUS_ACTIVE = true;
@@ -99,6 +93,10 @@ public class MapsActivity extends AppCompatActivity {
     private CarmenFeature photoLocation, deviceLocation;
     private GridLayout llTopSheet;
     private Icon icon;
+    private GetInfo getInfo = new GetInfo();
+    private Geocoder geocoder;
+    private Style style;
+    private boolean FLAG_IS_ORIGIN_CHANGED_FIRST_TIME = true;
 
     public static Icon drawableToIcon(@NonNull Context context, @DrawableRes int id, @ColorInt int colorRes) {
         Drawable vectorDrawable = ResourcesCompat.getDrawable(context.getResources(), id, context.getTheme());
@@ -126,6 +124,7 @@ public class MapsActivity extends AppCompatActivity {
         mapView = findViewById(R.id.mapView);
         startNavigationButton = findViewById(R.id.startButton);
         context = this;
+        geocoder = new Geocoder(this, Locale.getDefault());
 
         TopSheetBehavior topSheetBehavior = TopSheetBehavior.from(llTopSheet);
         topSheetBehavior.setState(TopSheetBehavior.STATE_COLLAPSED);
@@ -170,6 +169,7 @@ public class MapsActivity extends AppCompatActivity {
             myMapboxMap = mapboxMap;
             myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
             myMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"), style -> {
+                this.style = style;
                 int blue = Color.parseColor("#FF4A8FE1");
                 float alpfa = 1f;
                 LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(MapsActivity.this)
@@ -190,15 +190,12 @@ public class MapsActivity extends AppCompatActivity {
                 getRoute(style, origin, destination);
                 mapView.addOnDidFinishLoadingStyleListener(() -> {
                     Log.i("kolosova_checkInfo", "map's style has changed");
-                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));  //(IconFactory.getInstance(this).fromResource(R.drawable.map_marker_dark)));
+                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
                 });
                 mapView.addOnDidFinishLoadingMapListener(() -> {
                     Log.i("kolosova_checkInfo", "map has loaded");
                     myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
                 });
-
-                initSearchFab();
-                addUserLocations();
 
                 myMapboxMap.addOnMapClickListener(point -> {
                     if (!GetInfo.isOnline(this)) {
@@ -214,11 +211,7 @@ public class MapsActivity extends AppCompatActivity {
                         if (FLAG_CONNECTION_STATUS_ACTIVE == false && currentRoute == null)
                             restartActivity();
                         Log.d("kolosova_checkInfo", "on map click");
-                        if (!myMapboxMap.getMarkers().isEmpty()) {
-                            myMapboxMap.clear();
-                        }
-                        addMarkerOnMap(point);
-                        myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
+                        addMarkerOnMap(point, false);
                         return true;
                     }
                 });
@@ -230,8 +223,11 @@ public class MapsActivity extends AppCompatActivity {
                         .build();
                 myMapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
 
-                GetInfo getInfo = new GetInfo();
-                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                if (style.isFullyLoaded()) {
+                    initSearchFab();
+                    addUserLocations();
+                }
+
                 LatLng point = new LatLng(deviceLatitude, deviceLongitude);
                 originName = getInfo.getPlaceFullName(geocoder, point) + ", " + getInfo.getCountryName(geocoder, point);
                 destinationName = placeName + ", " + countryName;
@@ -260,6 +256,7 @@ public class MapsActivity extends AppCompatActivity {
 
     private void initSearchFab() {
         findViewById(R.id.fab_location_search1).setOnClickListener(view -> {
+            startNavigationButton.setVisibility(View.INVISIBLE);
             Intent intent = new PlaceAutocomplete.IntentBuilder()
                     .accessToken(Mapbox.getAccessToken())
                     .placeOptions(PlaceOptions.builder()
@@ -269,10 +266,11 @@ public class MapsActivity extends AppCompatActivity {
                             .addInjectedFeature(photoLocation)
                             .build(PlaceOptions.MODE_CARDS))
                     .build(MapsActivity.this);
-            startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
+            startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE_1);
         });
 
         findViewById(R.id.fab_location_search2).setOnClickListener(view -> {
+            startNavigationButton.setVisibility(View.INVISIBLE);
             Intent intent = new PlaceAutocomplete.IntentBuilder()
                     .accessToken(Mapbox.getAccessToken())
                     .placeOptions(PlaceOptions.builder()
@@ -282,11 +280,43 @@ public class MapsActivity extends AppCompatActivity {
                             .addInjectedFeature(photoLocation)
                             .build(PlaceOptions.MODE_CARDS))
                     .build(MapsActivity.this);
-            startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
+            startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE_2);
         });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == MapsActivity.RESULT_OK && requestCode == REQUEST_CODE_AUTOCOMPLETE_1) {
+            CarmenFeature feature = PlaceAutocomplete.getPlace(data);
+            String placeName = feature.text();
+            tvDeparture.setText(placeName);
+            LatLng latlng = getInfo.getLatlngFromPlaceName(geocoder, placeName);
+            try {
+                origin = Point.fromLngLat(latlng.getLongitude(), latlng.getLatitude());
+                addMarkerOnMap(latlng, true);
+                FLAG_IS_ORIGIN_CHANGED_FIRST_TIME = false;
+                getRoute(style, origin, destination);
+            } catch (NullPointerException ex) {
+            }
+        } else if (resultCode == MapsActivity.RESULT_OK && requestCode == REQUEST_CODE_AUTOCOMPLETE_2) {
+            CarmenFeature feature = PlaceAutocomplete.getPlace(data);
+            String placeName = feature.text();
+            tvDestination.setText(placeName);
+            LatLng latlng = getInfo.getLatlngFromPlaceName(geocoder, placeName);
+            try {
+                destination = Point.fromLngLat(latlng.getLongitude(), latlng.getLatitude());
+                if (!FLAG_IS_ORIGIN_CHANGED_FIRST_TIME) addMarkerOnMap(latlng, true);
+                else addMarkerOnMap(latlng, false);
+                getRoute(style, origin, destination);
+            } catch (NullPointerException ex) {
+            }
+        }
+    }
+
     private void addUserLocations() {
+        Log.d("kolosova_checkLocation", deviceLongitude + ", " + deviceLatitude);
+        Log.d("kolosova_checkLocation", photoLongitude + ", " + photoLatitude);
+
         deviceLocation = CarmenFeature.builder().text("Device location")
                 .geometry(Point.fromLngLat(deviceLongitude, deviceLatitude))
                 .placeName("User location")
@@ -295,24 +325,33 @@ public class MapsActivity extends AppCompatActivity {
                 .build();
 
         photoLocation = CarmenFeature.builder().text("Photo location")
-                .geometry(Point.fromLngLat(deviceLongitude, deviceLatitude))
+                .geometry(Point.fromLngLat(photoLongitude, photoLatitude))
                 .placeName("Photo location")
                 .id("mapbox-sf")
                 .properties(new JsonObject())
                 .build();
     }
 
-    private void addMarkerOnMap(@NonNull LatLng point) {
+    private void addMarkerOnMap(@NonNull LatLng point, boolean flag) {
         //adds marker with description
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-        GetInfo getInfo = new GetInfo();
         placeNameClick = getInfo.getPlaceFullName(geocoder, point);
         countryNameClick = getInfo.getCountryName(geocoder, point);
+        if (!myMapboxMap.getMarkers().isEmpty()) {
+            myMapboxMap.clear();
+        }
         if (countryNameClick != "")
             myMapboxMap.addMarker(new MarkerOptions().setTitle(placeNameClick)
                     .setSnippet(countryNameClick)
                     .position(point));
         else myMapboxMap.addMarker(new MarkerOptions().setTitle(placeNameClick).position(point));
+
+        myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
+
+        if (flag == true) {
+            myMapboxMap.addMarker(new MarkerOptions().position(new LatLng(origin.latitude(), origin.longitude())).setTitle(placeName).setSnippet(countryName));
+            myMapboxMap.addMarker(new MarkerOptions().position(new LatLng(destination.latitude(), destination.longitude())).setTitle(placeName).setSnippet(countryName));
+        }
     }
 
     public Location getLocation() {
