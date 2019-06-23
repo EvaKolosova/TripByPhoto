@@ -42,9 +42,11 @@
     <dimen name="corner_radius">10dp</dimen>
     <dimen name="stroke_width">3dp</dimen>
 
+    <dimen name="absolute">-8dp</dimen>
+    <dimen name="button_little_width">125dp</dimen>
+
     <!-- //maybe it will be useful for creating new dimens
-      <dimen name="button_little_height">35dp</dimen>
-      <dimen name="button_little_width">125dp</dimen>
+
       <dimen name="button_normal_height">85dp</dimen>
       <dimen name="button_normal_width">280dp</dimen>
       <dimen name="toggle_height">45dp</dimen>
