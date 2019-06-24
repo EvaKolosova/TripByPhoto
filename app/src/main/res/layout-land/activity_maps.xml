@@ -36,13 +36,26 @@
             app:layout_behavior="com.example.tripbyphoto.TopSheetBehavior" />
     </android.support.design.widget.CoordinatorLayout>
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_location_stability"
+        android:layout_width="@dimen/floating_action_button_size"
+        android:layout_height="@dimen/floating_action_button_size"
+        android:layout_gravity="center"
+        android:layout_marginRight="@dimen/layout_margin_8"
+        android:layout_marginBottom="@dimen/null_dimen"
+        android:tint="@android:color/white"
+        app:backgroundTint="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toBottomOf="@+id/startButton"
+        app:layout_constraintEnd_toEndOf="@+id/coordinator"
+        app:srcCompat="@drawable/navigation" />
+
     <Button
         android:id="@+id/startButton"
         android:layout_width="@dimen/textview_land_width"
         android:layout_height="@dimen/text_button_height"
         android:layout_marginLeft="@dimen/layout_margin_16"
         android:layout_marginRight="@dimen/layout_margin_16"
-        android:layout_marginBottom="@dimen/layout_margin_16"
+        android:layout_marginBottom="@dimen/layout_margin_8"
         android:background="@layout/layout_bg"
         android:clickable="true"
         android:enabled="true"
