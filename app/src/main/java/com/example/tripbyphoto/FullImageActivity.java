@@ -19,7 +19,7 @@ public class FullImageActivity extends AppCompatActivity {
     private Double latitude, longitude;
     private ImageView imageView;
     private String uriString, placeName, countryName;
-    private TextView textViewLocation;
+    private TextView tvLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +28,7 @@ public class FullImageActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        imageView = findViewById(R.id.imageView);
+        imageView = findViewById(R.id.ivFullImage);
 
         if (getIntent().hasExtra("imageUri")) {
             uriString = getIntent().getStringExtra("imageUri");
@@ -36,18 +36,18 @@ public class FullImageActivity extends AppCompatActivity {
             imageView.setImageURI(uri);
         }
 
-        textViewLocation = findViewById(R.id.textViewLocation);
+        tvLocation = findViewById(R.id.tvLocation);
         if (getIntent().hasExtra("latitude")) {
             String latitudeString = getIntent().getStringExtra("latitude");
             latitude = Double.parseDouble(latitudeString);
-            textViewLocation.append(" " + latitudeString);
+            tvLocation.append(" " + latitudeString);
         }
 
-        textViewLocation.append(", Longitude: ");
+        tvLocation.append(", Longitude: ");
         if (getIntent().hasExtra("longitude")) {
             String longitudeString = getIntent().getStringExtra("longitude");
             longitude = Double.parseDouble(longitudeString);
-            textViewLocation.append(longitudeString);
+            tvLocation.append(longitudeString);
         }
 
         GetInfo getInfo = new GetInfo();
@@ -58,22 +58,22 @@ public class FullImageActivity extends AppCompatActivity {
 
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE)
-            textViewLocation.append(", " + placeName);
-        else textViewLocation.append("\n " + placeName);
-        if (countryName != "") textViewLocation.append(", " + countryName);
+            tvLocation.append(", " + placeName);
+        else tvLocation.append("\n " + placeName);
+        if (countryName != "") tvLocation.append(", " + countryName);
 
-        Integer textLength = textViewLocation.getText().length();
+        Integer textLength = tvLocation.getText().length();
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             if (textLength > 82) {
-                textViewLocation.getLayoutParams().height *= 2;
+                tvLocation.getLayoutParams().height *= 2;
             }
         } else {
             if (textLength > 42 && textLength < 84) {
-                textViewLocation.getLayoutParams().height *= 2;
+                tvLocation.getLayoutParams().height *= 2;
             } else if (textLength > 84 && textLength < 126) {
-                textViewLocation.getLayoutParams().height *= 3;
+                tvLocation.getLayoutParams().height *= 3;
             } else {
-                textViewLocation.getLayoutParams().height *= 4;
+                tvLocation.getLayoutParams().height *= 4;
             }
         }
 

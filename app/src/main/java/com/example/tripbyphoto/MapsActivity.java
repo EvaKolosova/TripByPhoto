@@ -181,12 +181,11 @@ public class MapsActivity extends AppCompatActivity {
             myMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"), style -> {
                 this.style = style;
                 int blue = Color.parseColor("#FF4A8FE1");
-                float alpfa = 1f;
                 LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(MapsActivity.this)
                         .foregroundTintColor(blue)
                         .backgroundTintColor(Color.WHITE)
                         .bearingTintColor(blue)
-                        .accuracyAlpha(alpfa)
+                        .accuracyAlpha(1f)
                         .accuracyColor(blue)
                         .build();
                 LocationComponentActivationOptions locationComponentActivationOptions = LocationComponentActivationOptions.builder(MapsActivity.this, style)
@@ -316,6 +315,11 @@ public class MapsActivity extends AppCompatActivity {
             getRoute(style, origin, destination);
         } else if (resultCode == MapsActivity.RESULT_OK && requestCode == REQUEST_CODE_AUTOCOMPLETE_2) {
             CarmenFeature feature = PlaceAutocomplete.getPlace(data);
+            if (feature.placeName().equals("Device location")) {
+                Toast toast = Toast.makeText(this, "You cannot choose Device Location for destination!", Toast.LENGTH_LONG);
+                toast.show();
+                return;
+            }
             searchDestinationName = feature.text();
             tvDestination.setText(searchDestinationName);
             LatLng latlng = getInfo.getLatlngFromPlaceName(geocoder, searchDestinationName);
@@ -334,8 +338,8 @@ public class MapsActivity extends AppCompatActivity {
     }
 
     private void addUserLocations() {
-        Log.d("kolosova_checkLocation", deviceLongitude + ", " + deviceLatitude);
-        Log.d("kolosova_checkLocation", photoLongitude + ", " + photoLatitude);
+        Log.d("kolosova_checkLocation", "DL " + deviceLongitude + ", " + deviceLatitude);
+        Log.d("kolosova_checkLocation", "PL " + photoLongitude + ", " + photoLatitude);
         Log.d("kolosova_checkNames", "ON is " + originName);
         Log.d("kolosova_checkNames", "DN is " + destinationName);
 

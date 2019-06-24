@@ -8,7 +8,7 @@
     tools:context=".LoadingActivity">
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/tvNameOfApp"
         android:layout_width="@dimen/textview_width"
         android:layout_height="@dimen/textview_height"
         android:layout_marginLeft="@dimen/layout_margin_8"
@@ -21,14 +21,14 @@
         android:textColor="@color/colorAbsolutelyWhite"
         android:textSize="@dimen/text_big_size"
         app:fontFamily="@font/fredericka_the_great"
-        app:layout_constraintBottom_toTopOf="@+id/imageView"
+        app:layout_constraintBottom_toTopOf="@+id/ivLogo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.074" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/ivLogo"
         android:layout_width="@dimen/image_logo_size"
         android:layout_height="@dimen/image_logo_size"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -39,7 +39,7 @@
         app:srcCompat="@mipmap/ic_launcher" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tvDescriptionOfAppp"
         android:layout_width="@dimen/text_location_width"
         android:layout_height="@dimen/text_description_height"
         android:layout_marginLeft="@dimen/layout_margin_16"
@@ -55,7 +55,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/ivLogo"
         app:layout_constraintVertical_bias="0.95" />
 
 </android.support.constraint.ConstraintLayout>
