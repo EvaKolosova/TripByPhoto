@@ -43,13 +43,13 @@
     <dimen name="stroke_width">3dp</dimen>
 
     <dimen name="absolute">-8dp</dimen>
-    <dimen name="button_little_width">125dp</dimen>
-
-    <!-- //maybe it will be useful for creating new dimens
-
-      <dimen name="button_normal_height">85dp</dimen>
-      <dimen name="button_normal_width">280dp</dimen>
-      <dimen name="toggle_height">45dp</dimen>
-      <dimen name="toggle_width">150dp</dimen> -->
+    <dimen name="include_height">135dp</dimen>
+    <dimen name="include_height_test">120dp</dimen>
+    <dimen name="include_peek_height">15dp</dimen>
+    <dimen name="edit_text_height">60dp</dimen>
+    <dimen name="edit_text_width">305dp</dimen>
+    <dimen name="edit_text_width_land">580dp</dimen>
+    <dimen name="floating_action_button_size">55dp</dimen>
+    <dimen name="toolbar_view_shadow_include_height">15dp</dimen>
 
 </resources>

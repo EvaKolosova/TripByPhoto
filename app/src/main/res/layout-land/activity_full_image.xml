@@ -14,7 +14,7 @@
         android:layout_centerHorizontal="true"
         android:foregroundGravity="center"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp" />
+        tools:layout_editor_absoluteX="@dimen/nulldimen" />
 
     <TextView
         android:id="@+id/textViewLocation"

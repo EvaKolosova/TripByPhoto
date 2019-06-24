@@ -4,19 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoadingActivity"
-    android:background="@drawable/oldpicture">
-
+    android:background="@drawable/oldpicture"
+    tools:context=".LoadingActivity">
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="@dimen/textview_width"
-        android:background="@layout/layout_bg"
         android:layout_height="@dimen/textview_height"
         android:layout_marginLeft="@dimen/layout_margin_8"
         android:layout_marginTop="@dimen/layout_margin_8"
         android:layout_marginRight="@dimen/layout_margin_8"
         android:layout_marginBottom="@dimen/layout_margin_8"
+        android:background="@layout/layout_bg"
         android:gravity="center"
         android:text="@string/app_name"
         android:textColor="@color/colorAbsolutelyWhite"
