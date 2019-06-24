@@ -24,10 +24,9 @@
         android:id="@+id/coordinator"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/null_dimen"
         tools:context=".testActivity"
-        tools:layout_editor_absoluteX="@dimen/absolute"
-        tools:layout_editor_absoluteY="@dimen/absolute">
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp">
 
         <include
             layout="@layout/top_sheet"
@@ -36,6 +35,19 @@
             app:layout_behavior="com.example.tripbyphoto.TopSheetBehavior" />
 
     </android.support.design.widget.CoordinatorLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_location_stability"
+        android:layout_width="@dimen/floating_action_button_size"
+        android:layout_height="@dimen/floating_action_button_size"
+        android:layout_gravity="center"
+        android:layout_marginRight="@dimen/layout_margin_8"
+        android:layout_marginBottom="@dimen/null_dimen"
+        android:tint="@android:color/white"
+        app:backgroundTint="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toBottomOf="@+id/startButton"
+        app:layout_constraintEnd_toEndOf="@+id/coordinator"
+        app:srcCompat="@drawable/navigation" />
 
     <Button
         android:id="@+id/startButton"

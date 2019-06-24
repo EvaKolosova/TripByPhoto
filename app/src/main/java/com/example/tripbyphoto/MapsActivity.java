@@ -57,6 +57,7 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 
 import java.util.Locale;
 
@@ -161,13 +162,21 @@ public class MapsActivity extends AppCompatActivity {
         if (getIntent().hasExtra("MAP_country_name")) {
             countryName = getIntent().getStringExtra("MAP_country_name");
         }
+        Log.d("kolosova_checkLocation", "PLat " + photoLatitude + ", PLng " + photoLongitude);
         pointOfDestination = new LatLng(photoLatitude, photoLongitude);
+        position = new CameraPosition.Builder()
+                .target(new LatLng(photoLatitude, photoLongitude))
+                .zoom(2)
+                .tilt(20)
+                .build();
+        Log.d("kolosova_checkPosition", position.toString());
 
         icon = drawableToIcon(context, R.drawable.mapbox_marker_icon_default, Color.parseColor("#FF3C9AA4"));
 
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(mapboxMap -> {
             myMapboxMap = mapboxMap;
+            myMapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
             myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
             myMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"), style -> {
                 this.style = style;
@@ -216,13 +225,6 @@ public class MapsActivity extends AppCompatActivity {
                         return true;
                     }
                 });
-
-                position = new CameraPosition.Builder()
-                        .target(new LatLng(photoLatitude, photoLongitude))
-                        .zoom(2)
-                        .tilt(20)
-                        .build();
-                myMapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
 
                 LatLng point = new LatLng(deviceLatitude, deviceLongitude);
                 originName = getInfo.getPlaceFullName(geocoder, point) + ", " + getInfo.getCountryName(geocoder, point);
@@ -282,6 +284,15 @@ public class MapsActivity extends AppCompatActivity {
                             .build(PlaceOptions.MODE_CARDS))
                     .build(MapsActivity.this);
             startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE_2);
+        });
+
+        findViewById(R.id.fab_location_stability).setOnClickListener(view -> {
+            position = new CameraPosition.Builder()
+                    .target(new LatLng(deviceLatitude, deviceLongitude))
+                    .zoom(10)
+                    .tilt(20)
+                    .build();
+            myMapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
         });
     }
 
@@ -441,6 +452,8 @@ public class MapsActivity extends AppCompatActivity {
 
             locationComponent.setCameraMode(CameraMode.TRACKING);
             locationComponent.setRenderMode(RenderMode.COMPASS);
+
+            Log.d("kolosova_checkLocation", "DLat " + deviceLatitude + ", DLng " + deviceLongitude);
         } catch (Exception e) {
             e.printStackTrace();
         }
