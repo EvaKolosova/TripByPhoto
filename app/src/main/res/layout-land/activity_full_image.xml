@@ -8,45 +8,46 @@
     tools:context=".FullImageActivity">
 
     <ImageView
-        android:id="@+id/ivFullImage"
+        android:id="@+id/iv_full_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
         android:foregroundGravity="center"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="@dimen/nulldimen" />
+        tools:layout_editor_absoluteX="@dimen/null_dimen" />
 
     <TextView
-        android:id="@+id/tvLocation"
-        android:layout_width="@dimen/text_land_location_width"
-        android:layout_height="@dimen/text_head_size"
+        android:id="@+id/tv_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/layout_margin_8"
         android:layout_marginTop="@dimen/layout_margin_8"
         android:layout_marginRight="@dimen/layout_margin_8"
         android:layout_marginBottom="@dimen/layout_margin_8"
         android:background="@layout/layout_bg"
-        android:fontFamily="@font/sniglet"
+        android:fontFamily="@font/techd"
+        android:textStyle="bold"
         android:gravity="center"
-        android:text="@string/LocationInfo"
         android:textSize="@dimen/text_middle_size"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvDescription"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_description"
+        app:layout_constraintVertical_bias="1.0"
+        tools:text="LocationInfo" />
 
     <TextView
-        android:id="@+id/tvDescription"
+        android:id="@+id/tv_description"
         android:layout_width="@dimen/text_land_location_width"
         android:layout_height="@dimen/text_button_height"
         android:layout_marginLeft="@dimen/layout_margin_8"
         android:layout_marginTop="@dimen/layout_margin_8"
         android:layout_marginRight="@dimen/layout_margin_8"
         android:background="@layout/layout_bg"
-        android:fontFamily="@font/sniglet"
+        android:fontFamily="@font/techd"
         android:gravity="center"
-        android:text="@string/DescriptionText"
+        android:text="@string/description_text"
         android:textSize="@dimen/text_little_size"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.494"

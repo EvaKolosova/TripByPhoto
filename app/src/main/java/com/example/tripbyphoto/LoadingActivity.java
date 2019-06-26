@@ -43,11 +43,15 @@ public class LoadingActivity extends AppCompatActivity {
         if (requestCode == REQUEST_ACCESS && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            Log.i("kolosova_permissionInfo", "Permissions Allowed! You can see photos from Gallery and use device's location.");
+            if (BuildConfig.DEBUG) {
+                Log.i("@string/log_permission", "@string/log_permission_msg_allow");
+            }
             startActivity(new Intent(LoadingActivity.this, MainActivity.class));
         } else {
             requestFewPermissions();
-            Log.i("kolosova_permissionInfo", "Permissions Denied! You canNOT see photos from Gallery and use device's location.");
+            if (BuildConfig.DEBUG) {
+                Log.i("@string/log_permission", "@string/log_permission_msg_deny");
+            }
         }
     }
 }

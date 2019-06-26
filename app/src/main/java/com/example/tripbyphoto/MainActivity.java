@@ -13,20 +13,22 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.tripbyphoto.adapter.RecyclerViewGridAdapter;
+import com.example.tripbyphoto.utils.ConnectionHelper;
+
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    protected RecyclerViewGridAdapter adapter;
-    protected RecyclerView imageGrid;
-    private Toolbar toolbar;
-    private String path, latitude, longitude;
-    private ArrayList<Double> locationLatitude = new ArrayList<>();// list of latitude & longitude
-    private ArrayList<Double> locationLongitude = new ArrayList<>();// list of latitude & longitude
-    private ArrayList<String> imagePaths = new ArrayList<>();// list of files paths
+    protected RecyclerViewGridAdapter mAdapter;
+    protected RecyclerView mImageGrid;
+    private Toolbar mToolbar;
+    private String mPath, mLatitude, mLongitude;
+    private ArrayList<Double> mLocationLatitude = new ArrayList<>();// list of latitude & longitude
+    private ArrayList<Double> mLocationLongitude = new ArrayList<>();// list of latitude & longitude
+    private ArrayList<String> mImagePaths = new ArrayList<>();// list of files paths
     RecyclerViewGridAdapter.OnItemClickListener onItemClickListener = (View view, int position, String name) -> {
-        if (!GetInfo.isOnline(this)) {
-            Toast.makeText(getApplicationContext(),
-                    "No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
+        if (!ConnectionHelper.isOnline(this)) {
+            Toast.makeText(getApplicationContext(), "@string/Internet_warning", Toast.LENGTH_LONG).show();
             return;
         } else {
             Intent i = new Intent(this, this.getClass());
@@ -34,12 +36,12 @@ public class MainActivity extends AppCompatActivity {
             this.startActivity(i);
             Intent intent = new Intent(MainActivity.this, FullImageActivity.class);
             intent.setAction(android.content.Intent.ACTION_SEND);
-            path = imagePaths.get(position);
-            latitude = String.valueOf(locationLatitude.get(position));
-            longitude = String.valueOf(locationLongitude.get(position));
-            intent.putExtra("imageUri", path);
-            intent.putExtra("latitude", latitude);
-            intent.putExtra("longitude", longitude);
+            mPath = mImagePaths.get(position);
+            mLatitude = String.valueOf(mLocationLatitude.get(position));
+            mLongitude = String.valueOf(mLocationLongitude.get(position));
+            intent.putExtra("@string/intent_uri", mPath);
+            intent.putExtra("@string/intent_lat", mLatitude);
+            intent.putExtra("@string/intent_lng", mLongitude);
             startActivity(intent);
         }
     };
@@ -57,27 +59,27 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     //filter for images without location-data
                     Double data_latitude = Double.parseDouble(cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.LATITUDE)));
-                    locationLatitude.add(data_latitude);
+                    mLocationLatitude.add(data_latitude);
                     Double data_longitude = Double.parseDouble(cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.LONGITUDE)));
-                    locationLongitude.add(data_longitude);
+                    mLocationLongitude.add(data_longitude);
 
                     String image = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                    imagePaths.add(image);
-                    Log.d("kolosova_checkInfo", image);
+                    mImagePaths.add(image);
+                    Log.d("@string/log_check", image);
                 } catch (NullPointerException e) {
-                    Log.d("kolosova_errorInfo", cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA)));
+                    Log.d("@string/log_error", cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA)));
                 }
             }
             cursor.close();
         }
 
-        imageGrid = findViewById(R.id.rvGridRecycler);
-        imageGrid.setLayoutManager(new GridLayoutManager(MainActivity.this, 2));
-        adapter = new RecyclerViewGridAdapter(MainActivity.this, imagePaths, locationLatitude, locationLongitude, onItemClickListener);
-        imageGrid.setAdapter(adapter);
+        mImageGrid = findViewById(R.id.rv_grid_recycler);
+        mImageGrid.setLayoutManager(new GridLayoutManager(MainActivity.this, 2));
+        mAdapter = new RecyclerViewGridAdapter(MainActivity.this, mImagePaths, mLocationLatitude, mLocationLongitude, onItemClickListener);
+        mImageGrid.setAdapter(mAdapter);
 
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
 
@@ -92,9 +94,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (!GetInfo.isOnline(this)) {
-            Toast.makeText(getApplicationContext(),
-                    "No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
+        if (!ConnectionHelper.isOnline(this)) {
+            Toast.makeText(getApplicationContext(), "@string/Internet_warning", Toast.LENGTH_LONG).show();
             return;
         }
     }

@@ -10,6 +10,6 @@
         layout="@layout/top_sheet"
         android:layout_width="match_parent"
         android:layout_height="@dimen/include_height_test"
-        app:layout_behavior="com.example.tripbyphoto.TopSheetBehavior" />
+        app:layout_behavior="com.example.tripbyphoto.map.TopSheetBehavior" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -13,8 +13,8 @@
     <corners android:radius="@dimen/corner_radius" />
 
     <padding
-        android:bottom="@dimen/null_dimen"
-        android:left="@dimen/null_dimen"
-        android:right="@dimen/null_dimen"
-        android:top="@dimen/null_dimen" />
+        android:bottom="@dimen/stroke_width"
+        android:left="@dimen/stroke_width"
+        android:right="@dimen/stroke_width"
+        android:top="@dimen/stroke_width" />
 </shape>

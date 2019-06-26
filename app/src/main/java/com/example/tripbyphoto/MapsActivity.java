@@ -31,11 +31,15 @@ import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.Toast;
 
+import com.example.tripbyphoto.map.TopSheetBehavior;
+import com.example.tripbyphoto.utils.ConnectionHelper;
+import com.example.tripbyphoto.utils.GeocoderHelper;
 import com.google.gson.JsonObject;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.geocoding.v5.models.CarmenFeature;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.BuildConfig;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
@@ -57,7 +61,6 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 
 import java.util.Locale;
 
@@ -66,39 +69,38 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MapsActivity extends AppCompatActivity {
-    private static final String TAG = "DirectionsInfo";
+    private static final String TAG = "@string/tag_directions";
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
     private static final long MIN_TIME_BW_UPDATES = 1;
     private static final int REQUEST_CODE_AUTOCOMPLETE_1 = 1;
     private static final int REQUEST_CODE_AUTOCOMPLETE_2 = 2;
-    protected MapboxMap myMapboxMap;
-    protected String placeName, countryName;
+    protected MapboxMap mMapboxMap;
+    protected String mPlaceName, mCountryName;
     protected boolean FLAG_CONNECTION_STATUS_ACTIVE = true;
-    private String placeNameClick, countryNameClick;
+    private String mPlaceNameClick, mCountryNameClick;
     private boolean isGPSEnabled = false, isNetworkEnabled = false, canGetLocation = false;
-    private LocationManager locationManager;
-    private Location location;
-    private Button startNavigationButton;
+    private LocationManager mLocationManager;
+    private Location mLocation;
+    private Button mStartNavigationButton;
     private EditText tvDeparture, tvDestination;
-    private Double photoLatitude, photoLongitude, deviceLatitude, deviceLongitude;
-    private LocationComponent locationComponent;
-    private MapView mapView;
-    private DirectionsRoute currentRoute = null;
-    private Point origin, destination;
-    private String originName, destinationName, searchOriginName, searchDestinationName;
-    private LatLng pointOfDestination;
-    private Context context;
-    private NavigationMapRoute navigationMapRoute;
-    private CameraPosition position;
-    private CarmenFeature photoLocation, deviceLocation;
-    private GridLayout llTopSheet;
-    private Icon icon;
-    private GetInfo getInfo = new GetInfo();
-    private Geocoder geocoder;
-    private Style style;
+    private Double mPhotoLatitude, mPhotoLongitude, mDeviceLatitude, mDeviceLongitude;
+    private LocationComponent mLocationComponent;
+    private MapView mMapView;
+    private DirectionsRoute mCurrentRoute = null;
+    private Point mOrigin, mDestination;
+    private String mOriginName, mDestinationName, mSearchOriginName, mSearchDestinationName;
+    private LatLng mPointOfDestination;
+    private Context mContext;
+    private NavigationMapRoute mNavigationMapRoute;
+    private CameraPosition mPosition;
+    private CarmenFeature mPhotoLocation, mDeviceLocation;
+    private GridLayout glTopSheet;
+    private Icon mIcon;
+    private GeocoderHelper ghDevice, ghOnSearchResult, ghOnMapClick;
+    private Geocoder mGeocoder;
+    private Style mStyle;
     private boolean FLAG_IS_ORIGIN_CHANGED = false;
     private boolean FLAG_IS_DESTINATION_CHANGED = false;
-
 
     public static Icon drawableToIcon(@NonNull Context context, @DrawableRes int id, @ColorInt int colorRes) {
         Drawable vectorDrawable = ResourcesCompat.getDrawable(context.getResources(), id, context.getTheme());
@@ -120,15 +122,15 @@ public class MapsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_maps);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        llTopSheet = findViewById(R.id.top_sheet);
-        tvDeparture = findViewById(R.id.tvDeparture);
-        tvDestination = findViewById(R.id.tvDestination);
-        mapView = findViewById(R.id.mapView);
-        startNavigationButton = findViewById(R.id.startButton);
-        context = this;
-        geocoder = new Geocoder(this, Locale.getDefault());
+        glTopSheet = findViewById(R.id.top_sheet);
+        tvDeparture = findViewById(R.id.tv_departure);
+        tvDestination = findViewById(R.id.tv_destination);
+        mMapView = findViewById(R.id.map_view);
+        mStartNavigationButton = findViewById(R.id.start_button);
+        mContext = this;
+        mGeocoder = new Geocoder(this, Locale.getDefault());
 
-        TopSheetBehavior topSheetBehavior = TopSheetBehavior.from(llTopSheet);
+        TopSheetBehavior topSheetBehavior = TopSheetBehavior.from(glTopSheet);
         topSheetBehavior.setState(TopSheetBehavior.STATE_COLLAPSED);
         topSheetBehavior.setState(TopSheetBehavior.STATE_EXPANDED);
         topSheetBehavior.setState(TopSheetBehavior.STATE_HIDDEN);
@@ -145,41 +147,41 @@ public class MapsActivity extends AppCompatActivity {
             }
         });
 
-        if (getIntent().hasExtra("MAP_latitude")) {
-            String latitudeString = getIntent().getStringExtra("MAP_latitude");
-            photoLatitude = Double.parseDouble(latitudeString);
+        if (getIntent().hasExtra("@string/MAP_lat")) {
+            String latitudeString = getIntent().getStringExtra("@string/MAP_lat");
+            mPhotoLatitude = Double.parseDouble(latitudeString);
         }
 
-        if (getIntent().hasExtra("MAP_longitude")) {
-            String longitudeString = getIntent().getStringExtra("MAP_longitude");
-            photoLongitude = Double.parseDouble(longitudeString);
+        if (getIntent().hasExtra("@string/MAP_lng")) {
+            String longitudeString = getIntent().getStringExtra("@string/MAP_lng");
+            mPhotoLongitude = Double.parseDouble(longitudeString);
         }
 
-        if (getIntent().hasExtra("MAP_place_name")) {
-            placeName = getIntent().getStringExtra("MAP_place_name");
+        if (getIntent().hasExtra("@string/MAP_place_name")) {
+            mPlaceName = getIntent().getStringExtra("@string/MAP_place_name");
         }
 
-        if (getIntent().hasExtra("MAP_country_name")) {
-            countryName = getIntent().getStringExtra("MAP_country_name");
+        if (getIntent().hasExtra("@string/MAP_country_name")) {
+            mCountryName = getIntent().getStringExtra("@string/MAP_country_name");
         }
-        Log.d("kolosova_checkLocation", "PLat " + photoLatitude + ", PLng " + photoLongitude);
-        pointOfDestination = new LatLng(photoLatitude, photoLongitude);
-        position = new CameraPosition.Builder()
-                .target(new LatLng(photoLatitude, photoLongitude))
+        Log.d("@string/log_location", "PhotoLat " + mPhotoLatitude + ", PhotoLng " + mPhotoLongitude);
+        mPointOfDestination = new LatLng(mPhotoLatitude, mPhotoLongitude);
+        mPosition = new CameraPosition.Builder()
+                .target(new LatLng(mPhotoLatitude, mPhotoLongitude))
                 .zoom(2)
                 .tilt(20)
                 .build();
-        Log.d("kolosova_checkPosition", position.toString());
+        Log.d("@string/log_position", mPosition.toString());
 
-        icon = drawableToIcon(context, R.drawable.mapbox_marker_icon_default, Color.parseColor("#FF3C9AA4"));
+        mIcon = drawableToIcon(mContext, R.drawable.mapbox_marker_icon_default, Color.parseColor("#FF3C9AA4"));
 
-        mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(mapboxMap -> {
-            myMapboxMap = mapboxMap;
-            myMapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
-            myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
-            myMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"), style -> {
-                this.style = style;
+        mMapView.onCreate(savedInstanceState);
+        mMapView.getMapAsync(mapboxMap -> {
+            mMapboxMap = mapboxMap;
+            mMapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(mPosition));
+            mMapboxMap.addMarker(new MarkerOptions().position(mPointOfDestination).setTitle(mPlaceName).setSnippet(mCountryName).icon(mIcon));
+            mMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"), style -> {
+                this.mStyle = style;
                 int blue = Color.parseColor("#FF4A8FE1");
                 LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(MapsActivity.this)
                         .foregroundTintColor(blue)
@@ -191,33 +193,32 @@ public class MapsActivity extends AppCompatActivity {
                 LocationComponentActivationOptions locationComponentActivationOptions = LocationComponentActivationOptions.builder(MapsActivity.this, style)
                         .locationComponentOptions(locationComponentOptions)
                         .build();
-                locationComponent = myMapboxMap.getLocationComponent();
-                locationComponent.activateLocationComponent(locationComponentActivationOptions);
+                mLocationComponent = mMapboxMap.getLocationComponent();
+                mLocationComponent.activateLocationComponent(locationComponentActivationOptions);
                 getLocation();
-                origin = Point.fromLngLat(deviceLongitude, deviceLatitude);
-                destination = Point.fromLngLat(photoLongitude, photoLatitude);
-                getRoute(style, origin, destination);
-                mapView.addOnDidFinishLoadingStyleListener(() -> {
-                    Log.i("kolosova_checkInfo", "map's style has changed");
-                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
+                mOrigin = Point.fromLngLat(mDeviceLongitude, mDeviceLatitude);
+                mDestination = Point.fromLngLat(mPhotoLongitude, mPhotoLatitude);
+                getRoute(style, mOrigin, mDestination);
+                mMapView.addOnDidFinishLoadingStyleListener(() -> {
+                    Log.i("@string/log_check", "@string/log_check_msg_style_changed");
+                    mMapboxMap.addMarker(new MarkerOptions().position(mPointOfDestination).setTitle(mPlaceName).setSnippet(mCountryName).icon(mIcon));
                 });
-                mapView.addOnDidFinishLoadingMapListener(() -> {
-                    Log.i("kolosova_checkInfo", "map has loaded");
-                    myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
+                mMapView.addOnDidFinishLoadingMapListener(() -> {
+                    Log.i("@string/log_check", "@string/log_check_style_loaded");
+                    mMapboxMap.addMarker(new MarkerOptions().position(mPointOfDestination).setTitle(mPlaceName).setSnippet(mCountryName).icon(mIcon));
                 });
 
-                myMapboxMap.addOnMapClickListener(point -> {
-                    if (!GetInfo.isOnline(this)) {
-                        Toast.makeText(getApplicationContext(),
-                                "No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
+                mMapboxMap.addOnMapClickListener(point -> {
+                    if (!ConnectionHelper.isOnline(this)) {
+                        Toast.makeText(getApplicationContext(), "@string/internet_warning", Toast.LENGTH_LONG).show();
                         FLAG_CONNECTION_STATUS_ACTIVE = false;
                         return false;
-                    } else if (!GetInfo.isGPSon(context)) {
-                        Toast.makeText(getApplicationContext(), "No GPS connection! Please, activate device location!", Toast.LENGTH_LONG).show();
+                    } else if (!ConnectionHelper.isGPSon(mContext)) {
+                        Toast.makeText(getApplicationContext(), "@string/GPS_warning", Toast.LENGTH_LONG).show();
                         FLAG_CONNECTION_STATUS_ACTIVE = false;
                         return false;
                     } else {
-                        if (FLAG_CONNECTION_STATUS_ACTIVE == false && currentRoute == null)
+                        if (FLAG_CONNECTION_STATUS_ACTIVE == false && mCurrentRoute == null)
                             restartActivity();
                         if (FLAG_IS_ORIGIN_CHANGED) addMarkerOnMap(point, true, true);
                         else addMarkerOnMap(point, false, true);
@@ -225,11 +226,12 @@ public class MapsActivity extends AppCompatActivity {
                     }
                 });
 
-                LatLng point = new LatLng(deviceLatitude, deviceLongitude);
-                originName = getInfo.getPlaceFullName(geocoder, point) + ", " + getInfo.getCountryName(geocoder, point);
-                destinationName = placeName + ", " + countryName;
-                tvDeparture.setText(originName);
-                tvDestination.setText(destinationName);
+                LatLng point = new LatLng(mDeviceLatitude, mDeviceLongitude);
+                ghDevice = new GeocoderHelper(mGeocoder, point);
+                mOriginName = ghDevice.getPlaceFullName() + ", " + ghDevice.getCountryName();
+                mDestinationName = mPlaceName + ", " + mCountryName;
+                tvDeparture.setText(mOriginName);
+                tvDestination.setText(mDestinationName);
 
                 if (style.isFullyLoaded()) {
                     initSearchFab();
@@ -257,41 +259,41 @@ public class MapsActivity extends AppCompatActivity {
     }
 
     private void initSearchFab() {
-        findViewById(R.id.fab_location_search1).setOnClickListener(view -> {
-            startNavigationButton.setVisibility(View.INVISIBLE);
+        findViewById(R.id.fab_location_search_1).setOnClickListener(view -> {
+            mStartNavigationButton.setVisibility(View.INVISIBLE);
             Intent intent = new PlaceAutocomplete.IntentBuilder()
                     .accessToken(Mapbox.getAccessToken())
                     .placeOptions(PlaceOptions.builder()
                             .backgroundColor(Color.parseColor("#FFEFE8E0"))
                             .limit(10)
-                            .addInjectedFeature(deviceLocation)
-                            .addInjectedFeature(photoLocation)
+                            .addInjectedFeature(mDeviceLocation)
+                            .addInjectedFeature(mPhotoLocation)
                             .build(PlaceOptions.MODE_CARDS))
                     .build(MapsActivity.this);
             startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE_1);
         });
 
-        findViewById(R.id.fab_location_search2).setOnClickListener(view -> {
-            startNavigationButton.setVisibility(View.INVISIBLE);
+        findViewById(R.id.fab_location_search_2).setOnClickListener(view -> {
+            mStartNavigationButton.setVisibility(View.INVISIBLE);
             Intent intent = new PlaceAutocomplete.IntentBuilder()
                     .accessToken(Mapbox.getAccessToken())
                     .placeOptions(PlaceOptions.builder()
                             .backgroundColor(Color.parseColor("#FFEFE8E0"))
                             .limit(10)
-                            .addInjectedFeature(deviceLocation)
-                            .addInjectedFeature(photoLocation)
+                            .addInjectedFeature(mDeviceLocation)
+                            .addInjectedFeature(mPhotoLocation)
                             .build(PlaceOptions.MODE_CARDS))
                     .build(MapsActivity.this);
             startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE_2);
         });
 
         findViewById(R.id.fab_location_stability).setOnClickListener(view -> {
-            position = new CameraPosition.Builder()
-                    .target(new LatLng(deviceLatitude, deviceLongitude))
+            mPosition = new CameraPosition.Builder()
+                    .target(new LatLng(mDeviceLatitude, mDeviceLongitude))
                     .zoom(10)
                     .tilt(20)
                     .build();
-            myMapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
+            mMapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(mPosition));
         });
     }
 
@@ -299,11 +301,12 @@ public class MapsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == MapsActivity.RESULT_OK && requestCode == REQUEST_CODE_AUTOCOMPLETE_1) {
             CarmenFeature feature = PlaceAutocomplete.getPlace(data);
-            searchOriginName = feature.text();
-            tvDeparture.setText(searchOriginName);
-            LatLng latlng = getInfo.getLatlngFromPlaceName(geocoder, searchOriginName);
-            origin = Point.fromLngLat(latlng.getLongitude(), latlng.getLatitude());
-            if (searchOriginName.equals(originName)) {
+            mSearchOriginName = feature.text();
+            tvDeparture.setText(mSearchOriginName);
+            ghOnSearchResult = new GeocoderHelper(mGeocoder, mSearchOriginName);
+            LatLng latlng = ghOnSearchResult.getLatlngFromPlaceName();
+            mOrigin = Point.fromLngLat(latlng.getLongitude(), latlng.getLatitude());
+            if (mSearchOriginName.equals(mOriginName)) {
                 FLAG_IS_ORIGIN_CHANGED = false;
                 if (FLAG_IS_DESTINATION_CHANGED) addMarkerOnMap(latlng, false, true);
                 else addMarkerOnMap(latlng, false, false);
@@ -312,19 +315,20 @@ public class MapsActivity extends AppCompatActivity {
                 if (FLAG_IS_DESTINATION_CHANGED) addMarkerOnMap(latlng, true, true);
                 else addMarkerOnMap(latlng, true, false);
             }
-            getRoute(style, origin, destination);
+            getRoute(mStyle, mOrigin, mDestination);
         } else if (resultCode == MapsActivity.RESULT_OK && requestCode == REQUEST_CODE_AUTOCOMPLETE_2) {
             CarmenFeature feature = PlaceAutocomplete.getPlace(data);
-            if (feature.placeName().equals("Device location")) {
-                Toast toast = Toast.makeText(this, "You cannot choose Device Location for destination!", Toast.LENGTH_LONG);
+            if (feature.placeName().equals("@string/device_location")) {
+                Toast toast = Toast.makeText(this, "@string/location_warning", Toast.LENGTH_LONG);
                 toast.show();
                 return;
             }
-            searchDestinationName = feature.text();
-            tvDestination.setText(searchDestinationName);
-            LatLng latlng = getInfo.getLatlngFromPlaceName(geocoder, searchDestinationName);
-            destination = Point.fromLngLat(latlng.getLongitude(), latlng.getLatitude());
-            if (searchDestinationName.equals(destinationName)) {
+            mSearchDestinationName = feature.text();
+            tvDestination.setText(mSearchDestinationName);
+            ghOnSearchResult = new GeocoderHelper(mGeocoder, mSearchDestinationName);
+            LatLng latlng = ghOnSearchResult.getLatlngFromPlaceName();
+            mDestination = Point.fromLngLat(latlng.getLongitude(), latlng.getLatitude());
+            if (mSearchDestinationName.equals(mDestinationName)) {
                 FLAG_IS_DESTINATION_CHANGED = false;
                 if (FLAG_IS_ORIGIN_CHANGED) addMarkerOnMap(latlng, true, false);
                 else addMarkerOnMap(latlng, false, false);
@@ -333,56 +337,55 @@ public class MapsActivity extends AppCompatActivity {
                 if (FLAG_IS_ORIGIN_CHANGED) addMarkerOnMap(latlng, true, true);
                 else addMarkerOnMap(latlng, false, true);
             }
-            getRoute(style, origin, destination);
+            getRoute(mStyle, mOrigin, mDestination);
         }
     }
 
     private void addUserLocations() {
-        Log.d("kolosova_checkLocation", "DL " + deviceLongitude + ", " + deviceLatitude);
-        Log.d("kolosova_checkLocation", "PL " + photoLongitude + ", " + photoLatitude);
-        Log.d("kolosova_checkNames", "ON is " + originName);
-        Log.d("kolosova_checkNames", "DN is " + destinationName);
+        if (BuildConfig.DEBUG) {
+            Log.d("@string/log_location", "DeviceLocation: " + mDeviceLongitude + ", " + mDeviceLatitude);
+            Log.d("@string/log_location", "PhotoLocation: " + mPhotoLongitude + ", " + mPhotoLatitude);
+            Log.d("@string/log_names", "OriginName: " + mOriginName);
+            Log.d("@string/log_names", "DestinationName: " + mDestinationName);
+        }
 
-        deviceLocation = CarmenFeature.builder().text(originName)
-                .geometry(Point.fromLngLat(deviceLongitude, deviceLatitude))
-                .placeName("Device location")
-                .id("mapbox-sf")
+        mDeviceLocation = CarmenFeature.builder().text(mOriginName)
+                .geometry(Point.fromLngLat(mDeviceLongitude, mDeviceLatitude))
+                .placeName("@string/device_location")
+                .id("@string/mapbox_const")
                 .properties(new JsonObject())
                 .build();
 
-        photoLocation = CarmenFeature.builder().text(destinationName)
-                .geometry(Point.fromLngLat(photoLongitude, photoLatitude))
-                .placeName("Photo location")
-                .id("mapbox-sf")
+        mPhotoLocation = CarmenFeature.builder().text(mDestinationName)
+                .geometry(Point.fromLngLat(mPhotoLongitude, mPhotoLatitude))
+                .placeName("@string/photo_location")
+                .id("@string/mapbox_const")
                 .properties(new JsonObject())
                 .build();
     }
 
     private void addMarkerOnMap(@NonNull LatLng point, boolean flagOrigin, boolean flagDestination) {
         //adds marker with description
-        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-        placeNameClick = getInfo.getPlaceFullName(geocoder, point);
-        countryNameClick = getInfo.getCountryName(geocoder, point);
-        if (!myMapboxMap.getMarkers().isEmpty()) {
-            myMapboxMap.clear();
+        ghOnMapClick = new GeocoderHelper(mGeocoder, point);
+        mPlaceNameClick = ghOnMapClick.getPlaceFullName();
+        mCountryNameClick = ghOnMapClick.getCountryName();
+        if (!mMapboxMap.getMarkers().isEmpty()) {
+            mMapboxMap.clear();
         }
 
-        myMapboxMap.addMarker(new MarkerOptions().position(pointOfDestination).setTitle(placeName).setSnippet(countryName).icon(icon));
+        mMapboxMap.addMarker(new MarkerOptions().position(mPointOfDestination).setTitle(mPlaceName).setSnippet(mCountryName).icon(mIcon));
 
-        if (countryNameClick != "")
-            myMapboxMap.addMarker(new MarkerOptions().setTitle(placeNameClick)
-                    .setSnippet(countryNameClick)
+        if (mCountryNameClick != "")
+            mMapboxMap.addMarker(new MarkerOptions().setTitle(mPlaceNameClick)
+                    .setSnippet(mCountryNameClick)
                     .position(point));
         else
-            myMapboxMap.addMarker(new MarkerOptions().setTitle(placeNameClick).position(point));
-
-
-        //if(originName.equals(placeNameClick))
+            mMapboxMap.addMarker(new MarkerOptions().setTitle(mPlaceNameClick).position(point));
 
         if (flagOrigin)
-            myMapboxMap.addMarker(new MarkerOptions().position(new LatLng(origin.latitude(), origin.longitude())).setTitle(searchOriginName));
+            mMapboxMap.addMarker(new MarkerOptions().position(new LatLng(mOrigin.latitude(), mOrigin.longitude())).setTitle(mSearchOriginName));
         if (flagDestination)
-            myMapboxMap.addMarker(new MarkerOptions().position(new LatLng(destination.latitude(), destination.longitude())).setTitle(searchDestinationName));
+            mMapboxMap.addMarker(new MarkerOptions().position(new LatLng(mDestination.latitude(), mDestination.longitude())).setTitle(mSearchDestinationName));
     }
 
     public Location getLocation() {
@@ -405,77 +408,76 @@ public class MapsActivity extends AppCompatActivity {
                 }
             };
 
-            locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
 
-            isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            isGPSEnabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             Log.v("isGPSEnabled", "= " + isGPSEnabled);
 
-            isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            isNetworkEnabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
             Log.v("isNetworkEnabled", "= " + isNetworkEnabled);
 
             if (isGPSEnabled == false && isNetworkEnabled == false) {
                 // no network provider is enabled
-                Log.d("kolosova_error", "no provider for getting the device location");
+                Log.d("@string/log_error", "no provider for getting the device location");
             } else {
                 this.canGetLocation = true;
                 if (isNetworkEnabled) {
-                    location = null;
+                    mLocation = null;
                     if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                             && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         return null;
                     }
-                    locationComponent.setLocationComponentEnabled(true);
-                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
-                    Log.d("Network", "Network");
-                    if (locationManager != null) {
+                    mLocationComponent.setLocationComponentEnabled(true);
+                    mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
+                    if (BuildConfig.DEBUG) Log.d("@string/tag_network", "Network");
+                    if (mLocationManager != null) {
                         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                             return null;
                         }
-                        location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        if (location != null) {
-                            deviceLatitude = location.getLatitude();
-                            deviceLongitude = location.getLongitude();
+                        mLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        if (mLocation != null) {
+                            mDeviceLatitude = mLocation.getLatitude();
+                            mDeviceLongitude = mLocation.getLongitude();
                         }
                     }
                 }
                 if (isGPSEnabled) {
-                    location = null;
-                    locationComponent.setLocationComponentEnabled(true);
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
+                    mLocation = null;
+                    mLocationComponent.setLocationComponentEnabled(true);
+                    mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
                     Log.d("GPS Enabled", "GPS Enabled");
-                    if (locationManager != null) {
-                        location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                        if (location != null) {
-                            deviceLatitude = location.getLatitude();
-                            deviceLongitude = location.getLongitude();
+                    if (mLocationManager != null) {
+                        mLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        if (mLocation != null) {
+                            mDeviceLatitude = mLocation.getLatitude();
+                            mDeviceLongitude = mLocation.getLongitude();
                         }
                     }
                 }
             }
 
-            locationComponent.setCameraMode(CameraMode.TRACKING);
-            locationComponent.setRenderMode(RenderMode.COMPASS);
+            mLocationComponent.setCameraMode(CameraMode.TRACKING);
+            mLocationComponent.setRenderMode(RenderMode.COMPASS);
 
-            Log.d("kolosova_checkLocation", "DLat " + deviceLatitude + ", DLng " + deviceLongitude);
+            Log.d("@string/log_location", "DeviceLat " + mDeviceLatitude + ", DeviceLng " + mDeviceLongitude);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return location;
+        return mLocation;
     }
 
     public void startNavigationClick(View view) {
-        if (!GetInfo.isOnline(this)) {
-            Toast.makeText(getApplicationContext(),
-                    "No Internet connection! Please, turn on wi-fi or mobile data for information loading!", Toast.LENGTH_LONG).show();
+        if (!ConnectionHelper.isOnline(this)) {
+            Toast.makeText(getApplicationContext(), "@string/internet_warning", Toast.LENGTH_LONG).show();
             FLAG_CONNECTION_STATUS_ACTIVE = false;
-        } else if (!GetInfo.isGPSon(context)) {
-            Toast.makeText(getApplicationContext(), "No GPS connection! Please, activate device location!", Toast.LENGTH_LONG).show();
+        } else if (!ConnectionHelper.isGPSon(mContext)) {
+            Toast.makeText(getApplicationContext(), "@string/GPS_warning", Toast.LENGTH_LONG).show();
             FLAG_CONNECTION_STATUS_ACTIVE = false;
         } else {
-            Log.d("kolosova_checkInfo", "button is clicked");
+            if (BuildConfig.DEBUG) Log.d("@string/log_check", "button is clicked");
             NavigationLauncherOptions options = NavigationLauncherOptions.builder()
-                    .directionsRoute(currentRoute)
+                    .directionsRoute(mCurrentRoute)
                     //.shouldSimulateRoute(true) //for checking routeNavigationFunctions
                     .build();
             NavigationLauncher.startNavigation(MapsActivity.this, options);
@@ -494,32 +496,33 @@ public class MapsActivity extends AppCompatActivity {
                     public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
                         System.out.println(call.request().url().toString());
 
-                        Log.d(TAG, "Response code: " + response.code());
+                        if (BuildConfig.DEBUG)
+                            Log.d(TAG, "@string/response_code" + response.code());
                         if (response.body() == null) {
-                            Log.e(TAG, "No routes found, make sure you set the right user and access token.");
+                            if (BuildConfig.DEBUG) Log.e(TAG, "@string/msg_no_rotes_found_access");
                             return;
                         } else if (response.body().routes().size() < 1) {
-                            Log.e(TAG, "No routes found");
-                            Toast.makeText(context, "No routes found...",
+                            if (BuildConfig.DEBUG) Log.e(TAG, "@string/msg_no_routes_found");
+                            Toast.makeText(mContext, "No routes found...",
                                     Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        currentRoute = response.body().routes().get(0);
+                        mCurrentRoute = response.body().routes().get(0);
                         // Draw the route on the map
                         if (style.isFullyLoaded()) {
-                            if (navigationMapRoute != null) {
-                                navigationMapRoute.removeRoute();
+                            if (mNavigationMapRoute != null) {
+                                mNavigationMapRoute.removeRoute();
                             } else {
-                                navigationMapRoute = new NavigationMapRoute(null, mapView, myMapboxMap);
+                                mNavigationMapRoute = new NavigationMapRoute(null, mMapView, mMapboxMap);
                             }
-                            navigationMapRoute.addRoute(currentRoute);
+                            mNavigationMapRoute.addRoute(mCurrentRoute);
                         }
-                        startNavigationButton.setVisibility(View.VISIBLE);
+                        mStartNavigationButton.setVisibility(View.VISIBLE);
                     }
 
                     @Override
                     public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-                        Log.e(TAG, "Error: " + throwable.getMessage());
+                        if (BuildConfig.DEBUG) Log.e(TAG, "@string/error" + throwable.getMessage());
                     }
                 });
     }
@@ -528,45 +531,45 @@ public class MapsActivity extends AppCompatActivity {
     @SuppressWarnings({"MissingPermission"})
     protected void onStart() {
         super.onStart();
-        mapView.onStart();
+        mMapView.onStart();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mapView.onResume();
+        mMapView.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mapView.onPause();
+        mMapView.onPause();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mapView.onStop();
+        mMapView.onStop();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (outState != null) {
-            mapView.onSaveInstanceState(outState);
+            mMapView.onSaveInstanceState(outState);
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mapView.onDestroy();
+        mMapView.onDestroy();
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        mapView.onLowMemory();
+        mMapView.onLowMemory();
     }
 
     @Override
@@ -574,20 +577,21 @@ public class MapsActivity extends AppCompatActivity {
         switch (item.getItemId()) {
 
             case R.id.item1:
-                Log.d("kolosova_checkInfo", String.valueOf(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll")));
-                myMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"));
+                if (BuildConfig.DEBUG)
+                    Log.d("@string/log_check", String.valueOf(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll")));
+                mMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"));
                 return true;
             case R.id.item2:
-                Log.d("kolosova_checkInfo", Style.MAPBOX_STREETS);
-                myMapboxMap.setStyle(Style.MAPBOX_STREETS);
+                if (BuildConfig.DEBUG) Log.d("@string/log_check", Style.MAPBOX_STREETS);
+                mMapboxMap.setStyle(Style.MAPBOX_STREETS);
                 return true;
             case R.id.item3:
-                Log.d("kolosova_checkInfo", Style.SATELLITE);
-                myMapboxMap.setStyle(Style.SATELLITE);
+                if (BuildConfig.DEBUG) Log.d("@string/log_check", Style.SATELLITE);
+                mMapboxMap.setStyle(Style.SATELLITE);
                 return true;
             case R.id.item4:
-                Log.d("kolosova_checkInfo", Style.SATELLITE_STREETS);
-                myMapboxMap.setStyle(Style.SATELLITE_STREETS);
+                if (BuildConfig.DEBUG) Log.d("@string/log_check", Style.SATELLITE_STREETS);
+                mMapboxMap.setStyle(Style.SATELLITE_STREETS);
                 return true;
             default:
                 onBackPressed();

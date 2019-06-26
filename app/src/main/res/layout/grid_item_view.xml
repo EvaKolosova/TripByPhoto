@@ -4,7 +4,7 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:id="@+id/imageOne"
+        android:id="@+id/image_one"
         android:layout_width="@dimen/image_item_width"
         android:layout_height="@dimen/image_item_height"
         android:layout_row="0"

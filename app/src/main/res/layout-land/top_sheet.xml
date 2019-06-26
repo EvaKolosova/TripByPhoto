@@ -15,67 +15,88 @@
     app:layout_behavior="com.example.tripbyphoto.TopSheetBehavior"
     app:layout_constraintTop_toTopOf="parent">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/floating_action_button_size">
 
-    <EditText
-        android:id="@+id/tvDeparture"
-        android:layout_width="@dimen/edit_text_width_land"
-        android:layout_height="@dimen/edit_text_height"
-        android:layout_row="0"
-        android:layout_column="0"
-        android:layout_columnWeight="0.75"
-        android:layout_gravity="left"
-        android:backgroundTint="@color/colorPrimary"
-        android:hint="Departure"
-        android:imeOptions="actionSearch"
-        android:inputType="textAutoComplete|textAutoCorrect"
-        android:singleLine="true"
-        android:textColor="@color/colorPrimaryDark" />
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_location_search_1"
+            android:layout_width="@dimen/floating_action_button_size"
+            android:layout_height="match_parent"
+            android:layout_row="0"
+            android:layout_column="0"
+            android:layout_columnWeight="0.25"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="end|center"
+            android:layout_marginTop="@dimen/null_dimen"
+            android:layout_marginRight="@dimen/null_dimen"
+            android:layout_marginBottom="@dimen/null_dimen"
+            android:tint="@android:color/white"
+            app:backgroundTint="@color/colorPrimaryDark"
+            app:srcCompat="@android:drawable/ic_search_category_default" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_location_search1"
-        android:layout_width="@dimen/floating_action_button_size"
-        android:layout_height="@dimen/floating_action_button_size"
-        android:layout_row="0"
-        android:layout_column="0"
-        android:layout_columnWeight="0.25"
-        android:layout_gravity="end|center"
-        android:layout_marginTop="@dimen/null_dimen"
-        android:layout_marginRight="@dimen/null_dimen"
-        android:layout_marginBottom="@dimen/null_dimen"
-        android:tint="@android:color/white"
-        app:backgroundTint="@color/colorPrimaryDark"
-        app:srcCompat="@android:drawable/ic_search_category_default" />
 
-    <EditText
-        android:id="@+id/tvDestination"
-        android:layout_width="@dimen/edit_text_width_land"
-        android:layout_height="@dimen/edit_text_height"
-        android:layout_row="1"
-        android:layout_column="0"
-        android:layout_columnWeight="0.75"
-        android:layout_gravity="left"
-        android:backgroundTint="@color/colorPrimary"
-        android:hint="Destination"
-        android:imeOptions="actionGo"
-        android:inputType="textAutoComplete|textAutoCorrect"
-        android:singleLine="true"
-        android:textColor="@color/colorPrimaryDark" />
+        <EditText
+            android:id="@+id/tv_departure"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/edit_text_height"
+            android:layout_row="0"
+            android:layout_column="0"
+            android:layout_columnWeight="0.75"
+            android:layout_gravity="left"
+            android:layout_toLeftOf="@id/fab_location_search_1"
+            android:backgroundTint="@color/colorPrimary"
+            android:fontFamily="@font/techd"
+            android:hint="Departure"
+            android:imeOptions="actionSearch"
+            android:inputType="textAutoComplete|textAutoCorrect"
+            android:paddingLeft="@dimen/layout_margin_8"
+            android:paddingRight="@dimen/layout_margin_8"
+            android:singleLine="true"
+            android:textColor="@color/colorPrimaryDark" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_location_search2"
-        android:layout_width="55dp"
-        android:layout_height="@dimen/floating_action_button_size"
-        android:layout_row="1"
-        android:layout_column="0"
-        android:layout_columnWeight="0.25"
-        android:layout_gravity="end|center"
-        android:layout_marginTop="@dimen/null_dimen"
-        android:layout_marginRight="@dimen/null_dimen"
-        android:layout_marginBottom="@dimen/null_dimen"
-        android:foregroundGravity="center"
-        android:tint="@android:color/white"
-        app:backgroundTint="@color/colorPrimaryDark"
-        app:srcCompat="@android:drawable/ic_search_category_default" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/floating_action_button_size">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_location_search_2"
+            android:layout_width="@dimen/floating_action_button_size"
+            android:layout_height="match_parent"
+            android:layout_row="1"
+            android:layout_column="0"
+            android:layout_columnWeight="0.25"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="end|center"
+            android:layout_marginTop="@dimen/null_dimen"
+            android:layout_marginRight="@dimen/null_dimen"
+            android:layout_marginBottom="@dimen/null_dimen"
+            android:tint="@android:color/white"
+            app:backgroundTint="@color/colorPrimaryDark"
+            app:srcCompat="@android:drawable/ic_search_category_default" />
+
+        <EditText
+            android:id="@+id/tv_destination"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/edit_text_height"
+            android:layout_row="1"
+            android:layout_column="0"
+            android:layout_columnWeight="0.75"
+            android:layout_gravity="left"
+            android:layout_toLeftOf="@id/fab_location_search_2"
+            android:backgroundTint="@color/colorPrimary"
+            android:fontFamily="@font/techd"
+            android:hint="Destination"
+            android:imeOptions="actionGo"
+            android:inputType="textAutoComplete|textAutoCorrect"
+            android:paddingLeft="@dimen/layout_margin_8"
+            android:paddingRight="@dimen/layout_margin_8"
+            android:singleLine="true"
+            android:textColor="@color/colorPrimaryDark" />
+
+    </RelativeLayout>
 
     <View
         android:layout_width="match_parent"

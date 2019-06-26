@@ -1,4 +1,4 @@
-package com.example.tripbyphoto;
+package com.example.tripbyphoto.map;
 
 /*
  * Copyright (C) 2015 The Android Open Source Project

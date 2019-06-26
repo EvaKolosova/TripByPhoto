@@ -1,4 +1,4 @@
-package com.example.tripbyphoto;
+package com.example.tripbyphoto.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -9,23 +9,25 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.example.tripbyphoto.R;
+import com.mapbox.mapboxsdk.BuildConfig;
 
 import java.util.ArrayList;
 
 public class RecyclerViewGridAdapter extends RecyclerView.Adapter<RecyclerViewGridAdapter.ViewHolder> {
-    protected ArrayList<Double> locationLatitude;
-    protected ArrayList<Double> locationLongitude;
+    protected ArrayList<Double> mLocationLatitude;
+    protected ArrayList<Double> mLocationLongitude;
     protected Context mContext;
-    private ArrayList<String> imagePaths;
+    private ArrayList<String> mImagePaths;
     private LayoutInflater mInflater;
     private OnItemClickListener mListener;
 
     // data is passed into the constructor
-    RecyclerViewGridAdapter(Context context, ArrayList<String> imagePaths, ArrayList<Double> locLatitude, ArrayList<Double> locLongitude, OnItemClickListener onItemClickListener) {
+    public RecyclerViewGridAdapter(Context context, ArrayList<String> imagePaths, ArrayList<Double> locLatitude, ArrayList<Double> locLongitude, OnItemClickListener onItemClickListener) {
         this.mInflater = LayoutInflater.from(context);
-        this.imagePaths = imagePaths;
-        this.locationLatitude = locLatitude;
-        this.locationLongitude = locLongitude;
+        this.mImagePaths = imagePaths;
+        this.mLocationLatitude = locLatitude;
+        this.mLocationLongitude = locLongitude;
         mContext = context;
         mListener = onItemClickListener;
     }
@@ -41,7 +43,7 @@ public class RecyclerViewGridAdapter extends RecyclerView.Adapter<RecyclerViewGr
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
 
-        String itemData = imagePaths.get(position);
+        String itemData = mImagePaths.get(position);
         Glide
                 .with(mContext)
                 .load(itemData)
@@ -49,13 +51,15 @@ public class RecyclerViewGridAdapter extends RecyclerView.Adapter<RecyclerViewGr
 
         holder.imageview.setOnClickListener((View v) -> {
             mListener.onItemClick(v, position, "imageView");
-            Log.d("kolosova_imagePosition", "ImageClickPosition: " + position);
+            if (BuildConfig.DEBUG) {
+                Log.d("@string/log_position", "ImageClickPosition: " + position);
+            }
         });
     }
 
     @Override
     public int getItemCount() {
-        return imagePaths.size();
+        return mImagePaths.size();
     }
 
     public long getItemId(int position) {
@@ -73,7 +77,7 @@ public class RecyclerViewGridAdapter extends RecyclerView.Adapter<RecyclerViewGr
 
         ViewHolder(View itemView) {
             super(itemView);
-            imageview = itemView.findViewById(R.id.imageOne);
+            imageview = itemView.findViewById(R.id.image_one);
         }
     }
 }
