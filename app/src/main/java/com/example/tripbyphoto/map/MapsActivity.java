@@ -200,11 +200,11 @@ public class MapsActivity extends AppCompatActivity {
                 mDestination = Point.fromLngLat(mPhotoLongitude, mPhotoLatitude);
                 getRoute(style, mOrigin, mDestination);
                 mMapView.addOnDidFinishLoadingStyleListener(() -> {
-                    Log.i(AppConsts.LOG_CHECK, Integer.toString(R.string.log_check_msg_style_changed));
+                    Log.i(AppConsts.LOG_CHECK, getString(R.string.log_check_msg_style_changed));
                     mMapboxMap.addMarker(new MarkerOptions().position(mPointOfDestination).setTitle(mPlaceName).setSnippet(mCountryName).icon(mIcon));
                 });
                 mMapView.addOnDidFinishLoadingMapListener(() -> {
-                    Log.i(AppConsts.LOG_CHECK, Integer.toString(R.string.log_check_style_loaded));
+                    Log.i(AppConsts.LOG_CHECK, getString(R.string.log_check_style_loaded));
                     mMapboxMap.addMarker(new MarkerOptions().position(mPointOfDestination).setTitle(mPlaceName).setSnippet(mCountryName).icon(mIcon));
                 });
 
@@ -581,7 +581,7 @@ public class MapsActivity extends AppCompatActivity {
 
             case R.id.item1:
                 if (BuildConfig.DEBUG)
-                    Log.d(AppConsts.LOG_CHECK, String.valueOf(new Style.Builder().fromUrl(AppConsts.STYLE_URI)));
+                    Log.d(AppConsts.LOG_CHECK, AppConsts.STYLE_URI);
                 mMapboxMap.setStyle(new Style.Builder().fromUrl(AppConsts.STYLE_URI));
                 return true;
             case R.id.item2:

@@ -46,13 +46,13 @@ public class LoadingActivity extends AppCompatActivity {
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_GET_CONTENT);
             if (BuildConfig.DEBUG) {
-                Log.i(AppConsts.LOG_PERMISSION, String.valueOf(R.string.log_permission_msg_allow));
+                Log.i(AppConsts.LOG_PERMISSION, getString(R.string.log_permission_msg_allow));
             }
             startActivity(new Intent(LoadingActivity.this, MainActivity.class));
         } else {
             requestFewPermissions();
             if (BuildConfig.DEBUG) {
-                Log.i(AppConsts.LOG_PERMISSION, String.valueOf(R.string.log_permission_msg_deny));
+                Log.i(AppConsts.LOG_PERMISSION, getString(R.string.log_permission_msg_deny));
             }
         }
     }
