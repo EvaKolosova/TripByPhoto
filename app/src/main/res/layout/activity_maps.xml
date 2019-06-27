@@ -8,7 +8,7 @@
     android:background="@color/colorBackground"
     style="@style/AppTheme"
     android:theme="@style/AppTheme"
-    tools:context=".MapsActivity">
+    tools:context=".map.MapsActivity">
 
     <com.mapbox.mapboxsdk.maps.MapView
         android:id="@+id/map_view"

@@ -1,4 +1,4 @@
-package com.example.tripbyphoto;
+package com.example.tripbyphoto.map;
 
 import android.Manifest;
 import android.content.Context;
@@ -31,7 +31,7 @@ import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.Toast;
 
-import com.example.tripbyphoto.map.TopSheetBehavior;
+import com.example.tripbyphoto.R;
 import com.example.tripbyphoto.utils.AppConsts;
 import com.example.tripbyphoto.utils.ConnectionHelper;
 import com.example.tripbyphoto.utils.GeocoderHelper;

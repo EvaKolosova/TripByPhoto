@@ -22,8 +22,6 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
     protected RecyclerViewGridAdapter mAdapter;
     protected RecyclerView mImageGrid;
-    private Toolbar mToolbar;
-    private String mPath, mLatitude, mLongitude;
     private ArrayList<Double> mLocationLatitude = new ArrayList<>();
     private ArrayList<Double> mLocationLongitude = new ArrayList<>();
     private ArrayList<String> mImagePaths = new ArrayList<>();
@@ -37,12 +35,12 @@ public class MainActivity extends AppCompatActivity {
             this.startActivity(i);
             Intent intent = new Intent(MainActivity.this, FullImageActivity.class);
             intent.setAction(android.content.Intent.ACTION_SEND);
-            mPath = mImagePaths.get(position);
-            mLatitude = String.valueOf(mLocationLatitude.get(position));
-            mLongitude = String.valueOf(mLocationLongitude.get(position));
-            intent.putExtra(AppConsts.INTENT_IMAGE_URI, mPath);
-            intent.putExtra(AppConsts.INTENT_LATITUDE, mLatitude);
-            intent.putExtra(AppConsts.INTENT_LONGITUDE, mLongitude);
+            String path = mImagePaths.get(position);
+            String latitude = String.valueOf(mLocationLatitude.get(position));
+            String longitude = String.valueOf(mLocationLongitude.get(position));
+            intent.putExtra(AppConsts.INTENT_IMAGE_URI, path);
+            intent.putExtra(AppConsts.INTENT_LATITUDE, latitude);
+            intent.putExtra(AppConsts.INTENT_LONGITUDE, longitude);
             startActivity(intent);
         }
     };
@@ -79,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new RecyclerViewGridAdapter(MainActivity.this, mImagePaths, mLocationLatitude, mLocationLongitude, onItemClickListener);
         mImageGrid.setAdapter(mAdapter);
 
-        mToolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
 

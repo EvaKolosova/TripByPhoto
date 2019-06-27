@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.tripbyphoto.map.MapsActivity;
 import com.example.tripbyphoto.utils.AppConsts;
 import com.example.tripbyphoto.utils.ConnectionHelper;
 import com.example.tripbyphoto.utils.GeocoderHelper;
