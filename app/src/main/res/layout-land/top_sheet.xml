@@ -35,7 +35,6 @@
             app:backgroundTint="@color/colorPrimaryDark"
             app:srcCompat="@android:drawable/ic_search_category_default" />
 
-
         <EditText
             android:id="@+id/tv_departure"
             android:layout_width="match_parent"
@@ -47,6 +46,7 @@
             android:layout_toLeftOf="@id/fab_location_search_1"
             android:backgroundTint="@color/colorPrimary"
             android:fontFamily="@font/techd"
+            android:textStyle="bold"
             android:hint="Departure"
             android:imeOptions="actionSearch"
             android:inputType="textAutoComplete|textAutoCorrect"
@@ -88,6 +88,7 @@
             android:layout_toLeftOf="@id/fab_location_search_2"
             android:backgroundTint="@color/colorPrimary"
             android:fontFamily="@font/techd"
+            android:textStyle="bold"
             android:hint="Destination"
             android:imeOptions="actionGo"
             android:inputType="textAutoComplete|textAutoCorrect"
