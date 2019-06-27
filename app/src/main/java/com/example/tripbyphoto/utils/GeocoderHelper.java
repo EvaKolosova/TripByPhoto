@@ -35,7 +35,7 @@ public class GeocoderHelper {
         if (!addresses.isEmpty()) {
             if (addresses.get(0) != null) resultAddr = addresses.get(0);
             if (BuildConfig.DEBUG) {
-                Log.d("@string/log_check", resultAddr.toString());
+                Log.d(AppConsts.LOG_CHECK, resultAddr.toString());
             }
         }
         return resultAddr;
@@ -64,19 +64,19 @@ public class GeocoderHelper {
         if (mAddrFromLocation != null) {
             if (mAddrFromLocation.getThoroughfare() != null && !mAddrFromLocation.getThoroughfare().equals("Unnamed Road")) {
                 placeName += mAddrFromLocation.getThoroughfare();
-                if (BuildConfig.DEBUG) Log.d("@string/log_check", placeName);
+                if (BuildConfig.DEBUG) Log.d(AppConsts.LOG_CHECK, placeName);
                 if ((mAddrFromLocation.getLocality() != null) || mAddrFromLocation.getAdminArea() != null || mAddrFromLocation.getFeatureName() != null)
                     placeName += ", ";
             }
             if (mAddrFromLocation.getFeatureName() != null && !mAddrFromLocation.getFeatureName().equals("Unnamed Road")) {
                 placeName += mAddrFromLocation.getFeatureName();
-                if (BuildConfig.DEBUG) Log.d("@string/log_check", placeName);
+                if (BuildConfig.DEBUG) Log.d(AppConsts.LOG_CHECK, placeName);
                 if ((mAddrFromLocation.getLocality() != null) || mAddrFromLocation.getAdminArea() != null)
                     placeName += ", ";
             }
             if (mAddrFromLocation.getLocality() != null) {
                 placeName += mAddrFromLocation.getLocality();
-                if (BuildConfig.DEBUG) Log.d("@string/log_check", placeName);
+                if (BuildConfig.DEBUG) Log.d(AppConsts.LOG_CHECK, placeName);
                 if (mAddrFromLocation.getAdminArea() != null)
                     placeName += ", ";
             }

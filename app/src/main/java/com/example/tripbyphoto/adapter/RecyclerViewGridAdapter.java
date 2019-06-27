@@ -10,6 +10,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.example.tripbyphoto.R;
+import com.example.tripbyphoto.utils.AppConsts;
 import com.mapbox.mapboxsdk.BuildConfig;
 
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class RecyclerViewGridAdapter extends RecyclerView.Adapter<RecyclerViewGr
         holder.imageview.setOnClickListener((View v) -> {
             mListener.onItemClick(v, position, "imageView");
             if (BuildConfig.DEBUG) {
-                Log.d("@string/log_position", "ImageClickPosition: " + position);
+                Log.d(AppConsts.LOG_POSITION, "ImageClickPosition: " + position);
             }
         });
     }

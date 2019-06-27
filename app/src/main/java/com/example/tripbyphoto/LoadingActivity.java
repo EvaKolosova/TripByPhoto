@@ -11,6 +11,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.example.tripbyphoto.utils.AppConsts;
+
 public class LoadingActivity extends AppCompatActivity {
     private static final int REQUEST_ACCESS = 110;
 
@@ -44,13 +46,13 @@ public class LoadingActivity extends AppCompatActivity {
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_GET_CONTENT);
             if (BuildConfig.DEBUG) {
-                Log.i("@string/log_permission", "@string/log_permission_msg_allow");
+                Log.i(AppConsts.LOG_PERMISSION, String.valueOf(R.string.log_permission_msg_allow));
             }
             startActivity(new Intent(LoadingActivity.this, MainActivity.class));
         } else {
             requestFewPermissions();
             if (BuildConfig.DEBUG) {
-                Log.i("@string/log_permission", "@string/log_permission_msg_deny");
+                Log.i(AppConsts.LOG_PERMISSION, String.valueOf(R.string.log_permission_msg_deny));
             }
         }
     }

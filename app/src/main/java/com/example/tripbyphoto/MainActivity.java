@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.tripbyphoto.adapter.RecyclerViewGridAdapter;
+import com.example.tripbyphoto.utils.AppConsts;
 import com.example.tripbyphoto.utils.ConnectionHelper;
 
 import java.util.ArrayList;
@@ -23,12 +24,12 @@ public class MainActivity extends AppCompatActivity {
     protected RecyclerView mImageGrid;
     private Toolbar mToolbar;
     private String mPath, mLatitude, mLongitude;
-    private ArrayList<Double> mLocationLatitude = new ArrayList<>();// list of latitude & longitude
-    private ArrayList<Double> mLocationLongitude = new ArrayList<>();// list of latitude & longitude
-    private ArrayList<String> mImagePaths = new ArrayList<>();// list of files paths
+    private ArrayList<Double> mLocationLatitude = new ArrayList<>();
+    private ArrayList<Double> mLocationLongitude = new ArrayList<>();
+    private ArrayList<String> mImagePaths = new ArrayList<>();
     RecyclerViewGridAdapter.OnItemClickListener onItemClickListener = (View view, int position, String name) -> {
         if (!ConnectionHelper.isOnline(this)) {
-            Toast.makeText(getApplicationContext(), "@string/Internet_warning", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.internet_warning, Toast.LENGTH_LONG).show();
             return;
         } else {
             Intent i = new Intent(this, this.getClass());
@@ -39,9 +40,9 @@ public class MainActivity extends AppCompatActivity {
             mPath = mImagePaths.get(position);
             mLatitude = String.valueOf(mLocationLatitude.get(position));
             mLongitude = String.valueOf(mLocationLongitude.get(position));
-            intent.putExtra("@string/intent_uri", mPath);
-            intent.putExtra("@string/intent_lat", mLatitude);
-            intent.putExtra("@string/intent_lng", mLongitude);
+            intent.putExtra(AppConsts.INTENT_IMAGE_URI, mPath);
+            intent.putExtra(AppConsts.INTENT_LATITUDE, mLatitude);
+            intent.putExtra(AppConsts.INTENT_LONGITUDE, mLongitude);
             startActivity(intent);
         }
     };
@@ -65,9 +66,9 @@ public class MainActivity extends AppCompatActivity {
 
                     String image = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
                     mImagePaths.add(image);
-                    Log.d("@string/log_check", image);
+                    Log.d(AppConsts.LOG_CHECK, image);
                 } catch (NullPointerException e) {
-                    Log.d("@string/log_error", cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA)));
+                    Log.d(AppConsts.LOG_ERROR, cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA)));
                 }
             }
             cursor.close();
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (!ConnectionHelper.isOnline(this)) {
-            Toast.makeText(getApplicationContext(), "@string/Internet_warning", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.internet_warning, Toast.LENGTH_LONG).show();
             return;
         }
     }

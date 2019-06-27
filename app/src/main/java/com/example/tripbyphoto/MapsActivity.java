@@ -32,6 +32,7 @@ import android.widget.GridLayout;
 import android.widget.Toast;
 
 import com.example.tripbyphoto.map.TopSheetBehavior;
+import com.example.tripbyphoto.utils.AppConsts;
 import com.example.tripbyphoto.utils.ConnectionHelper;
 import com.example.tripbyphoto.utils.GeocoderHelper;
 import com.google.gson.JsonObject;
@@ -69,7 +70,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MapsActivity extends AppCompatActivity {
-    private static final String TAG = "@string/tag_directions";
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
     private static final long MIN_TIME_BW_UPDATES = 1;
     private static final int REQUEST_CODE_AUTOCOMPLETE_1 = 1;
@@ -147,31 +147,31 @@ public class MapsActivity extends AppCompatActivity {
             }
         });
 
-        if (getIntent().hasExtra("@string/MAP_lat")) {
-            String latitudeString = getIntent().getStringExtra("@string/MAP_lat");
+        if (getIntent().hasExtra(AppConsts.MAP_LAT)) {
+            String latitudeString = getIntent().getStringExtra(AppConsts.MAP_LAT);
             mPhotoLatitude = Double.parseDouble(latitudeString);
         }
 
-        if (getIntent().hasExtra("@string/MAP_lng")) {
-            String longitudeString = getIntent().getStringExtra("@string/MAP_lng");
+        if (getIntent().hasExtra(AppConsts.MAP_LNG)) {
+            String longitudeString = getIntent().getStringExtra(AppConsts.MAP_LNG);
             mPhotoLongitude = Double.parseDouble(longitudeString);
         }
 
-        if (getIntent().hasExtra("@string/MAP_place_name")) {
-            mPlaceName = getIntent().getStringExtra("@string/MAP_place_name");
+        if (getIntent().hasExtra(AppConsts.MAP_PLACE_NAME)) {
+            mPlaceName = getIntent().getStringExtra(AppConsts.MAP_PLACE_NAME);
         }
 
-        if (getIntent().hasExtra("@string/MAP_country_name")) {
-            mCountryName = getIntent().getStringExtra("@string/MAP_country_name");
+        if (getIntent().hasExtra(AppConsts.MAP_COUNTRY_NAME)) {
+            mCountryName = getIntent().getStringExtra(AppConsts.MAP_COUNTRY_NAME);
         }
-        Log.d("@string/log_location", "PhotoLat " + mPhotoLatitude + ", PhotoLng " + mPhotoLongitude);
+        Log.d(AppConsts.LOG_LOCATION, "PhotoLat " + mPhotoLatitude + ", PhotoLng " + mPhotoLongitude);
         mPointOfDestination = new LatLng(mPhotoLatitude, mPhotoLongitude);
         mPosition = new CameraPosition.Builder()
                 .target(new LatLng(mPhotoLatitude, mPhotoLongitude))
                 .zoom(2)
                 .tilt(20)
                 .build();
-        Log.d("@string/log_position", mPosition.toString());
+        Log.d(AppConsts.LOG_POSITION, mPosition.toString());
 
         mIcon = drawableToIcon(mContext, R.drawable.mapbox_marker_icon_default, Color.parseColor("#FF3C9AA4"));
 
@@ -180,7 +180,7 @@ public class MapsActivity extends AppCompatActivity {
             mMapboxMap = mapboxMap;
             mMapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(mPosition));
             mMapboxMap.addMarker(new MarkerOptions().position(mPointOfDestination).setTitle(mPlaceName).setSnippet(mCountryName).icon(mIcon));
-            mMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"), style -> {
+            mMapboxMap.setStyle(new Style.Builder().fromUrl(AppConsts.STYLE_URI), style -> {
                 this.mStyle = style;
                 int blue = Color.parseColor("#FF4A8FE1");
                 LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(MapsActivity.this)
@@ -200,21 +200,21 @@ public class MapsActivity extends AppCompatActivity {
                 mDestination = Point.fromLngLat(mPhotoLongitude, mPhotoLatitude);
                 getRoute(style, mOrigin, mDestination);
                 mMapView.addOnDidFinishLoadingStyleListener(() -> {
-                    Log.i("@string/log_check", "@string/log_check_msg_style_changed");
+                    Log.i(AppConsts.LOG_CHECK, Integer.toString(R.string.log_check_msg_style_changed));
                     mMapboxMap.addMarker(new MarkerOptions().position(mPointOfDestination).setTitle(mPlaceName).setSnippet(mCountryName).icon(mIcon));
                 });
                 mMapView.addOnDidFinishLoadingMapListener(() -> {
-                    Log.i("@string/log_check", "@string/log_check_style_loaded");
+                    Log.i(AppConsts.LOG_CHECK, Integer.toString(R.string.log_check_style_loaded));
                     mMapboxMap.addMarker(new MarkerOptions().position(mPointOfDestination).setTitle(mPlaceName).setSnippet(mCountryName).icon(mIcon));
                 });
 
                 mMapboxMap.addOnMapClickListener(point -> {
                     if (!ConnectionHelper.isOnline(this)) {
-                        Toast.makeText(getApplicationContext(), "@string/internet_warning", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), R.string.internet_warning, Toast.LENGTH_LONG).show();
                         FLAG_CONNECTION_STATUS_ACTIVE = false;
                         return false;
                     } else if (!ConnectionHelper.isGPSon(mContext)) {
-                        Toast.makeText(getApplicationContext(), "@string/GPS_warning", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), R.string.GPS_warning, Toast.LENGTH_LONG).show();
                         FLAG_CONNECTION_STATUS_ACTIVE = false;
                         return false;
                     } else {
@@ -318,8 +318,8 @@ public class MapsActivity extends AppCompatActivity {
             getRoute(mStyle, mOrigin, mDestination);
         } else if (resultCode == MapsActivity.RESULT_OK && requestCode == REQUEST_CODE_AUTOCOMPLETE_2) {
             CarmenFeature feature = PlaceAutocomplete.getPlace(data);
-            if (feature.placeName().equals("@string/device_location")) {
-                Toast toast = Toast.makeText(this, "@string/location_warning", Toast.LENGTH_LONG);
+            if (feature.placeName().equals(AppConsts.DEVICE_LOCATION)) {
+                Toast toast = Toast.makeText(this, R.string.location_warning, Toast.LENGTH_LONG);
                 toast.show();
                 return;
             }
@@ -343,23 +343,23 @@ public class MapsActivity extends AppCompatActivity {
 
     private void addUserLocations() {
         if (BuildConfig.DEBUG) {
-            Log.d("@string/log_location", "DeviceLocation: " + mDeviceLongitude + ", " + mDeviceLatitude);
-            Log.d("@string/log_location", "PhotoLocation: " + mPhotoLongitude + ", " + mPhotoLatitude);
-            Log.d("@string/log_names", "OriginName: " + mOriginName);
-            Log.d("@string/log_names", "DestinationName: " + mDestinationName);
+            Log.d(AppConsts.LOG_LOCATION, "DeviceLocation: " + mDeviceLongitude + ", " + mDeviceLatitude);
+            Log.d(AppConsts.LOG_LOCATION, "PhotoLocation: " + mPhotoLongitude + ", " + mPhotoLatitude);
+            Log.d(AppConsts.LOG_NAMES, "OriginName: " + mOriginName);
+            Log.d(AppConsts.LOG_NAMES, "DestinationName: " + mDestinationName);
         }
 
         mDeviceLocation = CarmenFeature.builder().text(mOriginName)
                 .geometry(Point.fromLngLat(mDeviceLongitude, mDeviceLatitude))
-                .placeName("@string/device_location")
-                .id("@string/mapbox_const")
+                .placeName(AppConsts.DEVICE_LOCATION)
+                .id(AppConsts.MAP_CONST)
                 .properties(new JsonObject())
                 .build();
 
         mPhotoLocation = CarmenFeature.builder().text(mDestinationName)
                 .geometry(Point.fromLngLat(mPhotoLongitude, mPhotoLatitude))
-                .placeName("@string/photo_location")
-                .id("@string/mapbox_const")
+                .placeName(AppConsts.PHOTO_LOCATION)
+                .id(AppConsts.MAP_CONST)
                 .properties(new JsonObject())
                 .build();
     }
@@ -418,7 +418,7 @@ public class MapsActivity extends AppCompatActivity {
 
             if (isGPSEnabled == false && isNetworkEnabled == false) {
                 // no network provider is enabled
-                Log.d("@string/log_error", "no provider for getting the device location");
+                Log.d(AppConsts.LOG_ERROR, "no provider for getting the device location");
             } else {
                 this.canGetLocation = true;
                 if (isNetworkEnabled) {
@@ -429,7 +429,7 @@ public class MapsActivity extends AppCompatActivity {
                     }
                     mLocationComponent.setLocationComponentEnabled(true);
                     mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
-                    if (BuildConfig.DEBUG) Log.d("@string/tag_network", "Network");
+                    if (BuildConfig.DEBUG) Log.d(AppConsts.TAG_NETWORK, "Network");
                     if (mLocationManager != null) {
                         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -460,7 +460,7 @@ public class MapsActivity extends AppCompatActivity {
             mLocationComponent.setCameraMode(CameraMode.TRACKING);
             mLocationComponent.setRenderMode(RenderMode.COMPASS);
 
-            Log.d("@string/log_location", "DeviceLat " + mDeviceLatitude + ", DeviceLng " + mDeviceLongitude);
+            Log.d(AppConsts.LOG_LOCATION, "DeviceLat " + mDeviceLatitude + ", DeviceLng " + mDeviceLongitude);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -469,13 +469,13 @@ public class MapsActivity extends AppCompatActivity {
 
     public void startNavigationClick(View view) {
         if (!ConnectionHelper.isOnline(this)) {
-            Toast.makeText(getApplicationContext(), "@string/internet_warning", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.internet_warning, Toast.LENGTH_LONG).show();
             FLAG_CONNECTION_STATUS_ACTIVE = false;
         } else if (!ConnectionHelper.isGPSon(mContext)) {
-            Toast.makeText(getApplicationContext(), "@string/GPS_warning", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.GPS_warning, Toast.LENGTH_LONG).show();
             FLAG_CONNECTION_STATUS_ACTIVE = false;
         } else {
-            if (BuildConfig.DEBUG) Log.d("@string/log_check", "button is clicked");
+            if (BuildConfig.DEBUG) Log.d(AppConsts.LOG_CHECK, "button is clicked");
             NavigationLauncherOptions options = NavigationLauncherOptions.builder()
                     .directionsRoute(mCurrentRoute)
                     //.shouldSimulateRoute(true) //for checking routeNavigationFunctions
@@ -497,12 +497,14 @@ public class MapsActivity extends AppCompatActivity {
                         System.out.println(call.request().url().toString());
 
                         if (BuildConfig.DEBUG)
-                            Log.d(TAG, "@string/response_code" + response.code());
+                            Log.d(AppConsts.TAG_DIRECTIONS, "@string/response_code" + response.code());
                         if (response.body() == null) {
-                            if (BuildConfig.DEBUG) Log.e(TAG, "@string/msg_no_rotes_found_access");
+                            if (BuildConfig.DEBUG)
+                                Log.e(AppConsts.TAG_DIRECTIONS, "@string/msg_no_rotes_found_access");
                             return;
                         } else if (response.body().routes().size() < 1) {
-                            if (BuildConfig.DEBUG) Log.e(TAG, "@string/msg_no_routes_found");
+                            if (BuildConfig.DEBUG)
+                                Log.e(AppConsts.TAG_DIRECTIONS, "@string/msg_no_routes_found");
                             Toast.makeText(mContext, "No routes found...",
                                     Toast.LENGTH_SHORT).show();
                             return;
@@ -522,7 +524,8 @@ public class MapsActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-                        if (BuildConfig.DEBUG) Log.e(TAG, "@string/error" + throwable.getMessage());
+                        if (BuildConfig.DEBUG)
+                            Log.e(AppConsts.TAG_DIRECTIONS, "@string/error" + throwable.getMessage());
                     }
                 });
     }
@@ -578,19 +581,19 @@ public class MapsActivity extends AppCompatActivity {
 
             case R.id.item1:
                 if (BuildConfig.DEBUG)
-                    Log.d("@string/log_check", String.valueOf(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll")));
-                mMapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/evakolosova/cjw68gr1o1s921cr087ywkqll"));
+                    Log.d(AppConsts.LOG_CHECK, String.valueOf(new Style.Builder().fromUrl(AppConsts.STYLE_URI)));
+                mMapboxMap.setStyle(new Style.Builder().fromUrl(AppConsts.STYLE_URI));
                 return true;
             case R.id.item2:
-                if (BuildConfig.DEBUG) Log.d("@string/log_check", Style.MAPBOX_STREETS);
+                if (BuildConfig.DEBUG) Log.d(AppConsts.LOG_CHECK, Style.MAPBOX_STREETS);
                 mMapboxMap.setStyle(Style.MAPBOX_STREETS);
                 return true;
             case R.id.item3:
-                if (BuildConfig.DEBUG) Log.d("@string/log_check", Style.SATELLITE);
+                if (BuildConfig.DEBUG) Log.d(AppConsts.LOG_CHECK, Style.SATELLITE);
                 mMapboxMap.setStyle(Style.SATELLITE);
                 return true;
             case R.id.item4:
-                if (BuildConfig.DEBUG) Log.d("@string/log_check", Style.SATELLITE_STREETS);
+                if (BuildConfig.DEBUG) Log.d(AppConsts.LOG_CHECK, Style.SATELLITE_STREETS);
                 mMapboxMap.setStyle(Style.SATELLITE_STREETS);
                 return true;
             default:
