@@ -82,7 +82,7 @@ public class GeocoderHelper {
             }
             if (mAddrFromLocation.getAdminArea() != null) {
                 placeName += mAddrFromLocation.getAdminArea();
-                if (BuildConfig.DEBUG) Log.d("@string/log_check", placeName);
+                if (BuildConfig.DEBUG) Log.d(AppConsts.LOG_CHECK, placeName);
             }
         }
         return placeName;

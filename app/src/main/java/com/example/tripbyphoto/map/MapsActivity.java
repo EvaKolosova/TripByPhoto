@@ -497,14 +497,14 @@ public class MapsActivity extends AppCompatActivity {
                         System.out.println(call.request().url().toString());
 
                         if (BuildConfig.DEBUG)
-                            Log.d(AppConsts.TAG_DIRECTIONS, "@string/response_code" + response.code());
+                            Log.d(AppConsts.TAG_DIRECTIONS, getString(R.string.response_code) + response.code());
                         if (response.body() == null) {
                             if (BuildConfig.DEBUG)
-                                Log.e(AppConsts.TAG_DIRECTIONS, "@string/msg_no_rotes_found_access");
+                                Log.e(AppConsts.TAG_DIRECTIONS, getString(R.string.msg_no_routs_found_access));
                             return;
                         } else if (response.body().routes().size() < 1) {
                             if (BuildConfig.DEBUG)
-                                Log.e(AppConsts.TAG_DIRECTIONS, "@string/msg_no_routes_found");
+                                Log.e(AppConsts.TAG_DIRECTIONS, getString(R.string.msg_no_routs_found));
                             Toast.makeText(mContext, "No routes found...",
                                     Toast.LENGTH_SHORT).show();
                             return;
@@ -525,7 +525,7 @@ public class MapsActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
                         if (BuildConfig.DEBUG)
-                            Log.e(AppConsts.TAG_DIRECTIONS, "@string/error" + throwable.getMessage());
+                            Log.e(AppConsts.TAG_DIRECTIONS, R.string.error + throwable.getMessage());
                     }
                 });
     }
