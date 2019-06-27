@@ -46,14 +46,14 @@
             android:layout_toLeftOf="@id/fab_location_search_1"
             android:backgroundTint="@color/colorPrimary"
             android:fontFamily="@font/techd"
-            android:textStyle="bold"
             android:hint="Departure"
             android:imeOptions="actionSearch"
             android:inputType="textAutoComplete|textAutoCorrect"
             android:paddingLeft="@dimen/layout_margin_8"
             android:paddingRight="@dimen/layout_margin_8"
             android:singleLine="true"
-            android:textColor="@color/colorPrimaryDark" />
+            android:textColor="@color/colorPrimaryDark"
+            android:textStyle="bold" />
 
     </RelativeLayout>
 
@@ -88,14 +88,14 @@
             android:layout_toLeftOf="@id/fab_location_search_2"
             android:backgroundTint="@color/colorPrimary"
             android:fontFamily="@font/techd"
-            android:textStyle="bold"
             android:hint="Destination"
             android:imeOptions="actionGo"
             android:inputType="textAutoComplete|textAutoCorrect"
             android:paddingLeft="@dimen/layout_margin_8"
             android:paddingRight="@dimen/layout_margin_8"
             android:singleLine="true"
-            android:textColor="@color/colorPrimaryDark" />
+            android:textColor="@color/colorPrimaryDark"
+            android:textStyle="bold" />
 
     </RelativeLayout>
 

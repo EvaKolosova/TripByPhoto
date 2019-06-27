@@ -254,7 +254,6 @@ public class MapsActivity extends AppCompatActivity {
         } else { // API 11-20
             tvDestination.setTextIsSelectable(true);
             tvDeparture.setTextIsSelectable(true);
-
         }
     }
 

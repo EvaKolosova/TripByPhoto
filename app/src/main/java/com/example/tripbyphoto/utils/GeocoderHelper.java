@@ -96,7 +96,6 @@ public class GeocoderHelper {
 
             return latLng;
         }
-
         return null;
     }
 }
