@@ -25,10 +25,10 @@ public class RecyclerViewGridAdapter extends RecyclerView.Adapter<RecyclerViewGr
 
     // data is passed into the constructor
     public RecyclerViewGridAdapter(Context context, ArrayList<String> imagePaths, ArrayList<Double> locLatitude, ArrayList<Double> locLongitude, OnItemClickListener onItemClickListener) {
-        this.mInflater = LayoutInflater.from(context);
-        this.mImagePaths = imagePaths;
-        this.mLocationLatitude = locLatitude;
-        this.mLocationLongitude = locLongitude;
+        mInflater = LayoutInflater.from(context);
+        mImagePaths = imagePaths;
+        mLocationLatitude = locLatitude;
+        mLocationLongitude = locLongitude;
         mContext = context;
         mListener = onItemClickListener;
     }
@@ -43,7 +43,6 @@ public class RecyclerViewGridAdapter extends RecyclerView.Adapter<RecyclerViewGr
     // binds data to the ImageView in each row
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-
         String itemData = mImagePaths.get(position);
         Glide
                 .with(mContext)
@@ -61,10 +60,6 @@ public class RecyclerViewGridAdapter extends RecyclerView.Adapter<RecyclerViewGr
     @Override
     public int getItemCount() {
         return mImagePaths.size();
-    }
-
-    public long getItemId(int position) {
-        return position;
     }
 
     // parent activity will implement this method to respond to click events

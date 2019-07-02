@@ -61,16 +61,19 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="89dp"
-        android:layout_height="80dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/tv_description_of_app"
+        android:layout_width="@dimen/cat_width"
+        android:layout_height="@dimen/cat_height"
+        android:layout_marginStart="@dimen/layout_margin_8"
+        android:layout_marginLeft="@dimen/layout_margin_8"
+        android:layout_marginEnd="@dimen/layout_margin_8"
+        android:layout_marginRight="@dimen/layout_margin_8"
+        android:layout_marginBottom="@dimen/cat_margin"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_description_of_app"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.787"
+        app:layout_constraintHorizontal_bias="0.781"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_logo"
+        app:layout_constraintVertical_bias="0.956"
         app:srcCompat="@drawable/cat" />
 
 </android.support.constraint.ConstraintLayout>

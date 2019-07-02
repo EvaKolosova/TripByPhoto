@@ -4,6 +4,9 @@
     <dimen name="layout_margin_16">16dp</dimen>
     <dimen name="layout_margin_110">110dp</dimen>
     <dimen name="layout_margin_23">23dp</dimen>
+    <dimen name="cat_margin">42dp</dimen>
+    <dimen name="cat_height">80dp</dimen>
+    <dimen name="cat_width">89dp</dimen>
     <dimen name="layout_toolbar_view_shadow">72dp</dimen>
     <dimen name="layout_recycler_view">74dp</dimen>
 

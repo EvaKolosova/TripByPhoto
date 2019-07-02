@@ -51,7 +51,16 @@
             android:background="@drawable/toolbar_dropshadow" />
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_grid_recycler"
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/toolbar"
+            android:layout_marginTop="@dimen/image_item_padding">
+
+        </android.support.v7.widget.RecyclerView>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_grid"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/toolbar"
