@@ -30,19 +30,18 @@ public class FragmentOne extends Fragment {
     private ArrayList<Double> mLocationLatitude = new ArrayList<>();
     private ArrayList<Double> mLocationLongitude = new ArrayList<>();
     private ArrayList<String> mImagePaths = new ArrayList<>();
-    protected View view;
     RecyclerViewGridAdapter.OnItemClickListener onItemClickListenerGrid = (View view, int position, String name) -> {
         if (!ConnectionHelper.isOnline(mContext)) {
             Toast.makeText(Mapbox.getApplicationContext(), R.string.internet_warning, Toast.LENGTH_LONG).show();
             return;
         } else {
-            Log.d(AppConsts.LOG_CHECK, "Item clicked successfully! On position " + position);
+            Log.d(AppConsts.LOG_CHECK + "FR1", "Item clicked successfully! On position " + position);
 
             String path = mImagePaths.get(position);
             String latitude = String.valueOf(mLocationLatitude.get(position));
             String longitude = String.valueOf(mLocationLongitude.get(position));
 
-            Log.d(AppConsts.LOG_CHECK, "path " + path + ", latitude " + latitude + ", longitude " + longitude);
+            Log.d(AppConsts.LOG_CHECK + "FR1", "path " + path + ", latitude " + latitude + ", longitude " + longitude);
 
             //TODO передать эти данные в Layout и подвинуть RV вправо!
             // mLayoutManager.smoothScrollToPosition(RV, mAdapter.getItemCount());
@@ -62,29 +61,23 @@ public class FragmentOne extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mContext = container.getContext();
 
-        Log.d("WTF", "onCreateView");
-
+        Log.d(AppConsts.LOG_CHECK + "FR1", "onCreateView");
         getImages = new GetImages(mContext);
         mImagePaths = getImages.getImagesPaths(false);
         mLocationLatitude = getImages.getImagesLatitude(false);
         mLocationLongitude = getImages.getImagesLongitude(true);
 
-        view = inflater.inflate(R.layout.layout_recycler_view, container, false);
+        View view = inflater.inflate(R.layout.layout_recycler_view, container, false);
         mImageGrid = view.findViewById(R.id.recycler_view_grid);
-        GridLayoutManager layoutManager = new GridLayoutManager(mContext, 2);
+
         mImageGrid.setVerticalScrollBarEnabled(true);
         mImageGrid.setHorizontalScrollBarEnabled(false);
-        mImageGrid.setLayoutManager(layoutManager);
-        mGridAdapter = new RecyclerViewGridAdapter(mContext, mImagePaths, mLocationLatitude, mLocationLongitude, onItemClickListenerGrid);
+        mImageGrid.setLayoutManager(new GridLayoutManager(mContext, 2));
+        mGridAdapter = new RecyclerViewGridAdapter(getActivity(), mImagePaths, mLocationLatitude, mLocationLongitude, onItemClickListenerGrid);
         mImageGrid.setAdapter(mGridAdapter);
-        if (BuildConfig.DEBUG)
-            Log.d(AppConsts.LOG_CHECK, "Item count is - " + mGridAdapter.getItemCount());
+        if (BuildConfig.DEBUG) {
+            Log.d(AppConsts.LOG_CHECK + "FR1", "Item count is - " + mGridAdapter.getItemCount());
+        }
         return view;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d("WTF", "onCreate");
     }
 }

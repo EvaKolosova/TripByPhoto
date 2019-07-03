@@ -1,30 +1,16 @@
 package com.example.tripbyphoto.adapter;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.PagerAdapter;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
 
-import com.example.tripbyphoto.R;
 import com.example.tripbyphoto.fragment.FragmentOne;
 import com.example.tripbyphoto.fragment.FragmentTwo;
-import com.example.tripbyphoto.utils.AppConsts;
-import com.mapbox.mapboxsdk.BuildConfig;
-
-import java.util.ArrayList;
 
 public class ViewPagerAdapter extends FragmentPagerAdapter {
     static final int NUMBER_OF_PAGES = 2;
-
 
 //    protected Context mContext;
 //    protected RecyclerView.LayoutManager mLayoutManager;
@@ -63,10 +49,6 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
         }
     }
 
-    @Override
-    public boolean isViewFromObject(@NonNull View view, @NonNull Object o) {
-        return false;
-    }
 
 
 //    // inflates the row layout from xml when needed
