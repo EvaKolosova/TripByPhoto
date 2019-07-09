@@ -15,6 +15,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.tripbyphoto.BuildConfig;
+import com.example.tripbyphoto.CallBackClass;
+import com.example.tripbyphoto.HelpCallClass;
 import com.example.tripbyphoto.R;
 import com.example.tripbyphoto.map.MapsActivity;
 import com.example.tripbyphoto.utils.AppConsts;
@@ -31,6 +34,8 @@ public class FragmentFullImage extends Fragment {
     protected Double mLatitude, mLongitude;
     protected Context mContext;
     protected View view;
+    protected CallBackClass callBackClass = new CallBackClass();
+    protected HelpCallClass helpCallClass = new HelpCallClass();
     private ImageView mImageView;
 
     public static FragmentFullImage newInstance(int numOfPage, String uriString, String latitude, String longitude) {
@@ -64,7 +69,12 @@ public class FragmentFullImage extends Fragment {
         view = inflater.inflate(R.layout.layout_full_image, container, false);
         mImageView = view.findViewById(R.id.iv_full_image);
 
-        Log.d(AppConsts.LOG_CHECK + "FR2", "onCreateView");
+        if (BuildConfig.DEBUG) {
+            Log.d(AppConsts.LOG_CHECK + "FR2", "onCreateView");
+        }
+
+        callBackClass.registerCallBack(helpCallClass);
+        helpCallClass.callBackVisibility(mImageView, true);
 
         setData();
 
@@ -119,5 +129,17 @@ public class FragmentFullImage extends Fragment {
     public void onResume() {
         super.onResume();
         setData();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        helpCallClass.callBackVisibility(mImageView, false);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        helpCallClass.callBackVisibility(mImageView, false);
     }
 }

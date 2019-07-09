@@ -2,6 +2,7 @@ package com.example.tripbyphoto.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.tripbyphoto.BuildConfig;
@@ -29,6 +31,7 @@ public class FragmentRecyclerView extends Fragment {
     private static final String MY_NUM_KEY = "numOfPage";
     protected ViewPagerAdapter mAdapter;
     protected ViewPager mPager;
+    protected ImageView scaleImage;
     protected CallBackClass callBackClass = new CallBackClass();
     protected HelpCallClass helpCallClass = new HelpCallClass();
     protected Context mContext;
@@ -56,11 +59,19 @@ public class FragmentRecyclerView extends Fragment {
 
             callBackClass.registerCallBack(helpCallClass);
             helpCallClass.callBackCall(path, latitude, longitude);
-            helpCallClass.callBackToggle(getActivity().findViewById(R.id.viewPager));
+            helpCallClass.callBackToggle(getActivity().findViewById(R.id.viewPager), getActivity().getApplicationContext());
 
             FragmentFullImage fragment = FragmentFullImage.newInstance(1, path, latitude, longitude);
             getFragmentManager().beginTransaction().replace(R.id.layout_full_image, fragment).commit();
 
+            scaleImage.setLayoutParams(new ConstraintLayout.LayoutParams(
+                    mImageGrid.getLayoutManager().findViewByPosition(position).getWidth(), mImageGrid.getLayoutManager().findViewByPosition(position).getHeight()));
+            view.buildDrawingCache();
+            scaleImage.setImageBitmap(view.getDrawingCache());
+            scaleImage.setX(mImageGrid.getChildAt(position).getX() + 20);
+            scaleImage.setY(mImageGrid.getChildAt(position).getY() + 20);
+
+            Log.i(AppConsts.LOG_CHECK, "x- " + mImageGrid.getChildAt(position).getX() + ", y- " + mImageGrid.getChildAt(position).getY() + ", view - " + mImageGrid.getChildAt(position));
         }
     };
 
@@ -79,16 +90,13 @@ public class FragmentRecyclerView extends Fragment {
 
         mAdapter = new ViewPagerAdapter(getActivity().getSupportFragmentManager());
         mPager = view.findViewById(R.id.viewPager);
+        mImageGrid = view.findViewById(R.id.recycler_view_grid);
+        scaleImage = view.findViewById(R.id.iv_scale_image);
 
-        if (BuildConfig.DEBUG) {
-            Log.d(AppConsts.LOG_CHECK + "FR1", "onCreateView");
-        }
         getImages = new GetImages(mContext);
         mImagePaths = getImages.getImagesPaths(false);
         mLocationLatitude = getImages.getImagesLatitude(false);
         mLocationLongitude = getImages.getImagesLongitude(true);
-
-        mImageGrid = view.findViewById(R.id.recycler_view_grid);
 
         mImageGrid.setVerticalScrollBarEnabled(true);
         mImageGrid.setHorizontalScrollBarEnabled(false);
@@ -96,7 +104,7 @@ public class FragmentRecyclerView extends Fragment {
         mGridAdapter = new RecyclerViewGridAdapter(getActivity(), mImagePaths, mLocationLatitude, mLocationLongitude, onItemClickListenerGrid);
         mImageGrid.setAdapter(mGridAdapter);
         if (BuildConfig.DEBUG) {
-            Log.d(AppConsts.LOG_CHECK + "FR1", "Item count is - " + mGridAdapter.getItemCount());
+            Log.d(AppConsts.LOG_CHECK + "FR1", "onCreateView, Item count is - " + mGridAdapter.getItemCount());
         }
         return view;
     }
