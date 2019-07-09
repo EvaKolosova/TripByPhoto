@@ -50,11 +50,12 @@
             android:layout_marginTop="@dimen/null_dimen"
             android:background="@drawable/toolbar_dropshadow" />
 
-        <android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
+        <android.support.v4.view.ViewPager
             android:id="@+id/viewPager"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/toolbar"
+            android:layout_marginTop="@dimen/layout_margin_8">
 
         </android.support.v4.view.ViewPager>
 

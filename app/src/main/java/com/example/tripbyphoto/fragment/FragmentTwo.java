@@ -1,9 +1,9 @@
 package com.example.tripbyphoto.fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,21 +19,30 @@ import com.example.tripbyphoto.R;
 import com.example.tripbyphoto.map.MapsActivity;
 import com.example.tripbyphoto.utils.AppConsts;
 import com.example.tripbyphoto.utils.ConnectionHelper;
-import com.example.tripbyphoto.utils.GetImages;
+import com.example.tripbyphoto.utils.GeocoderHelper;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 
-import java.util.ArrayList;
+import java.util.Locale;
 
 public class FragmentTwo extends Fragment {
     private static final String MY_NUM_KEY = "numOfPage";
-    protected ArrayList<Double> mLocationLatitude = new ArrayList<>();
-    protected ArrayList<Double> mLocationLongitude = new ArrayList<>();
-    protected ArrayList<String> mImagePaths = new ArrayList<>();
     protected String mUriString, mPlaceName, mCountryName;
     protected TextView tvLocation;
     protected Double mLatitude, mLongitude;
     protected Context mContext;
-    private GetImages getImages;
+    protected View view;
     private ImageView mImageView;
+
+    public static FragmentTwo newInstance(int numOfPage, String uriString, String latitude, String longitude) {
+        FragmentTwo f = new FragmentTwo();
+        Bundle args = new Bundle();
+        args.putInt(MY_NUM_KEY, numOfPage);
+        args.putString(AppConsts.INTENT_IMAGE_URI, uriString);
+        args.putString(AppConsts.INTENT_LATITUDE, latitude);
+        args.putString(AppConsts.INTENT_LONGITUDE, longitude);
+        f.setArguments(args);
+        return f;
+    }
 
     public static FragmentTwo newInstance(int numOfPage) {
         FragmentTwo f = new FragmentTwo();
@@ -46,61 +55,18 @@ public class FragmentTwo extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //TODO получение данных с первого фрагмента и их выгрузка
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mContext = getActivity().getApplicationContext();
 
-        View view = inflater.inflate(R.layout.layout_full_image, container, false);
+        view = inflater.inflate(R.layout.layout_full_image, container, false);
         mImageView = view.findViewById(R.id.iv_full_image);
 
         Log.d(AppConsts.LOG_CHECK + "FR2", "onCreateView");
-        mContext = container.getContext();
 
-        getImages = new GetImages(mContext);
-        mImagePaths = getImages.getImagesPaths(false);
-        mLocationLatitude = getImages.getImagesLatitude(false);
-        mLocationLongitude = getImages.getImagesLongitude(true);
-
-        Uri uri = Uri.parse(mImagePaths.get(0));
-        mImageView.setImageURI(uri);
-
-//        if (getIntent().hasExtra(AppConsts.INTENT_IMAGE_URI)) {
-//            mUriString = getIntent().getStringExtra(AppConsts.INTENT_IMAGE_URI);
-//            Uri uri = Uri.parse(mUriString);
-//            mImageView.setImageURI(uri);
-//        }
-//
-//        tvLocation = view.findViewById(R.id.tv_location);
-//        if (getIntent().hasExtra(AppConsts.INTENT_LATITUDE)) {
-//            String latitudeString = getIntent().getStringExtra(AppConsts.INTENT_LATITUDE);
-//            mLatitude = Double.parseDouble(latitudeString);
-//        }
-//
-//        if (getIntent().hasExtra(AppConsts.INTENT_LONGITUDE)) {
-//            String longitudeString = getIntent().getStringExtra(AppConsts.INTENT_LONGITUDE);
-//            mLongitude = Double.parseDouble(longitudeString);
-//        }
-//        String locationTextValue = String.format(getString(R.string.location_text_template), mLatitude, mLongitude);
-//        tvLocation.setText(locationTextValue);
-//
-//        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-//        LatLng point = new LatLng(mLatitude, mLongitude);
-//        GeocoderHelper geocoderHelper = new GeocoderHelper(geocoder, point);
-//        mCountryName = geocoderHelper.getCountryName();
-//        mPlaceName = geocoderHelper.getPlaceFullName();
-
-//        int orientation = getResources().getConfiguration().orientation;
-//        if (orientation == Configuration.ORIENTATION_LANDSCAPE)
-//            tvLocation.append(", " + mPlaceName);
-//        else tvLocation.append("\n " + mPlaceName);
-//        if (mCountryName != "") tvLocation.append(", " + mCountryName);
-
-
-//        if (BuildConfig.DEBUG)
-//            Log.d(AppConsts.LOG_CHECK, "Item count is - " + mGridAdapter.getItemCount());
+        setData();
 
         mImageView.setOnClickListener(v -> {
             if (!ConnectionHelper.isOnline(mContext)) {
@@ -120,5 +86,38 @@ public class FragmentTwo extends Fragment {
             }
         });
         return view;
+    }
+
+    public void setData() {
+        if (this.getArguments().getString(AppConsts.INTENT_IMAGE_URI) != null) {
+            mUriString = this.getArguments().getString(AppConsts.INTENT_IMAGE_URI);
+            mLatitude = Double.parseDouble(this.getArguments().getString(AppConsts.INTENT_LATITUDE));
+            mLongitude = Double.parseDouble(this.getArguments().getString(AppConsts.INTENT_LONGITUDE));
+
+            Uri uri = Uri.parse(mUriString);
+            mImageView.setImageURI(uri);
+
+            String locationTextValue = String.format(getString(R.string.location_text_template), mLatitude, mLongitude);
+            tvLocation = view.findViewById(R.id.tv_location);
+            tvLocation.setText(locationTextValue);
+
+            Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
+            LatLng point = new LatLng(mLatitude, mLongitude);
+            GeocoderHelper geocoderHelper = new GeocoderHelper(geocoder, point);
+            mCountryName = geocoderHelper.getCountryName();
+            mPlaceName = geocoderHelper.getPlaceFullName();
+
+            int orientation = getResources().getConfiguration().orientation;
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE)
+                tvLocation.append(", " + mPlaceName);
+            else tvLocation.append("\n " + mPlaceName);
+            if (mCountryName != "") tvLocation.append(", " + mCountryName);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setData();
     }
 }
