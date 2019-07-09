@@ -5,14 +5,12 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.Toast;
 
 import com.example.tripbyphoto.adapter.ViewPagerAdapter;
 import com.example.tripbyphoto.utils.ConnectionHelper;
 
-public class MainActivity extends AppCompatActivity { //implements CallBackClass.MyCallBack {
+public class MainActivity extends AppCompatActivity {
     protected ViewPagerAdapter mAdapter;
     protected ViewPager mPager;
 
@@ -59,7 +57,7 @@ public class MainActivity extends AppCompatActivity { //implements CallBackClass
 
     @Override
     public void onBackPressed() {
-        //эмулируется нажатие на HOME, сворачивая приложение если мы на первой странице, иначе просто возврат на первую страницу
+        //emulation press HOME, else return to the first page
         if (mPager.getCurrentItem() == 0) {
             Intent i = new Intent(Intent.ACTION_MAIN);
             i.addCategory(Intent.CATEGORY_HOME);

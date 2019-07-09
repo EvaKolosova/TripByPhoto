@@ -24,7 +24,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 
 import java.util.Locale;
 
-public class FragmentTwo extends Fragment {
+public class FragmentFullImage extends Fragment {
     private static final String MY_NUM_KEY = "numOfPage";
     protected String mUriString, mPlaceName, mCountryName;
     protected TextView tvLocation;
@@ -33,23 +33,23 @@ public class FragmentTwo extends Fragment {
     protected View view;
     private ImageView mImageView;
 
-    public static FragmentTwo newInstance(int numOfPage, String uriString, String latitude, String longitude) {
-        FragmentTwo f = new FragmentTwo();
+    public static FragmentFullImage newInstance(int numOfPage, String uriString, String latitude, String longitude) {
+        FragmentFullImage fragment = new FragmentFullImage();
         Bundle args = new Bundle();
         args.putInt(MY_NUM_KEY, numOfPage);
         args.putString(AppConsts.INTENT_IMAGE_URI, uriString);
         args.putString(AppConsts.INTENT_LATITUDE, latitude);
         args.putString(AppConsts.INTENT_LONGITUDE, longitude);
-        f.setArguments(args);
-        return f;
+        fragment.setArguments(args);
+        return fragment;
     }
 
-    public static FragmentTwo newInstance(int numOfPage) {
-        FragmentTwo f = new FragmentTwo();
+    public static FragmentFullImage newInstance(int numOfPage) {
+        FragmentFullImage fragment = new FragmentFullImage();
         Bundle args = new Bundle();
         args.putInt(MY_NUM_KEY, numOfPage);
-        f.setArguments(args);
-        return f;
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override

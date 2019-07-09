@@ -25,17 +25,17 @@ import com.mapbox.mapboxsdk.Mapbox;
 
 import java.util.ArrayList;
 
-public class FragmentOne extends Fragment {
+public class FragmentRecyclerView extends Fragment {
+    private static final String MY_NUM_KEY = "numOfPage";
     protected ViewPagerAdapter mAdapter;
     protected ViewPager mPager;
-    private static final String MY_NUM_KEY = "numOfPage";
     protected CallBackClass callBackClass = new CallBackClass();
     protected HelpCallClass helpCallClass = new HelpCallClass();
     protected Context mContext;
     protected RecyclerViewGridAdapter mGridAdapter;
     protected RecyclerView mImageGrid;
-    private GetImages getImages;
     protected View view;
+    private GetImages getImages;
     private ArrayList<Double> mLocationLatitude = new ArrayList<>();
     private ArrayList<Double> mLocationLongitude = new ArrayList<>();
     private ArrayList<String> mImagePaths = new ArrayList<>();
@@ -44,7 +44,9 @@ public class FragmentOne extends Fragment {
             Toast.makeText(Mapbox.getApplicationContext(), R.string.internet_warning, Toast.LENGTH_LONG).show();
             return;
         } else {
-            Log.d(AppConsts.LOG_CHECK + "FR1", "Item clicked successfully! On position " + position);
+            if (BuildConfig.DEBUG) {
+                Log.d(AppConsts.LOG_CHECK + "FR1", "Item clicked successfully! On position " + position);
+            }
 
             String path = mImagePaths.get(position);
             String latitude = String.valueOf(mLocationLatitude.get(position));
@@ -56,18 +58,18 @@ public class FragmentOne extends Fragment {
             helpCallClass.callBackCall(path, latitude, longitude);
             helpCallClass.callBackToggle(getActivity().findViewById(R.id.viewPager));
 
-            FragmentTwo fragment = FragmentTwo.newInstance(1, path, latitude, longitude);
+            FragmentFullImage fragment = FragmentFullImage.newInstance(1, path, latitude, longitude);
             getFragmentManager().beginTransaction().replace(R.id.layout_full_image, fragment).commit();
 
         }
     };
 
-    public static FragmentOne newInstance(int numOfPage) {
-        FragmentOne f = new FragmentOne();
+    public static FragmentRecyclerView newInstance(int numOfPage) {
+        FragmentRecyclerView fragment = new FragmentRecyclerView();
         Bundle args = new Bundle();
         args.putInt(MY_NUM_KEY, numOfPage);
-        f.setArguments(args);
-        return f;
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -78,7 +80,9 @@ public class FragmentOne extends Fragment {
         mAdapter = new ViewPagerAdapter(getActivity().getSupportFragmentManager());
         mPager = view.findViewById(R.id.viewPager);
 
-        Log.d(AppConsts.LOG_CHECK + "FR1", "onCreateView");
+        if (BuildConfig.DEBUG) {
+            Log.d(AppConsts.LOG_CHECK + "FR1", "onCreateView");
+        }
         getImages = new GetImages(mContext);
         mImagePaths = getImages.getImagesPaths(false);
         mLocationLatitude = getImages.getImagesLatitude(false);

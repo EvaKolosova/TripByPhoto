@@ -4,8 +4,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.example.tripbyphoto.fragment.FragmentOne;
-import com.example.tripbyphoto.fragment.FragmentTwo;
+import com.example.tripbyphoto.fragment.FragmentFullImage;
+import com.example.tripbyphoto.fragment.FragmentRecyclerView;
 
 public class ViewPagerAdapter extends FragmentPagerAdapter {
     static final int NUMBER_OF_PAGES = 2;
@@ -23,9 +23,9 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return FragmentOne.newInstance(0);
+                return FragmentRecyclerView.newInstance(0);
             case 1:
-                return FragmentTwo.newInstance(1);
+                return FragmentFullImage.newInstance(1);
             default:
                 return null;
         }
